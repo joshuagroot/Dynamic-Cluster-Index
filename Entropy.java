@@ -248,8 +248,8 @@ public class Entropy{
 				////System.out.println(entropy);
 			} while(increment());
 
-			double end_time = System.nanoTime();
-			double secondDifference = (end_time - start_time) / 1e6;
+			//double end_time = System.nanoTime();
+			//double secondDifference = (end_time - start_time) / 1e6;
 			//System.out.println("Thread: " + pos + " Finished with: " + calcCount + " jobs and took: " + secondDifference);
 			result[pos] = -entropy;
 		}
