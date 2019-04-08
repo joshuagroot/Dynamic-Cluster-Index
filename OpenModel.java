@@ -21,12 +21,9 @@ public class OpenModel {
 
 		try {
 			while ((line = br.readLine()) != null) {
-				// System.out.println(line);
-
 				results.add(line);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return results;
