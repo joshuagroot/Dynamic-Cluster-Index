@@ -44,17 +44,9 @@ public class Driver{
 				birds.get(i).addFlockMates(output.get(i)[13].split(" "));
 			}
 
-
-			//System.out.println(birds.get(0).getHea Mates);
-
 			open.getHeadings(birds, testInput);
-
-			//System.out.println(birds.get(0).getHeadings());
-
 			HashMap<Integer, Integer> map = birds.get(0).getMap();
-			//System.out.println(map);
 			int numHeadings = birds.get(0).getNumHeadings();
-			//System.out.println("NUMBER OF HEADINGS: " + numHeadings);
 			Iterator iter = map.values().iterator();
 
 			int count = 0;
@@ -63,13 +55,6 @@ public class Driver{
 				count = count + (int)iter.next();
 			}
 
-			// System.out.println("Size: " + numHeadings + " " + count);
-
-			// for(int i = maxSize; i > 1; i--){
-			// 	System.out.println("i: " + i);
-			// 	candidates.add(new CandidateSubset(birds, i, numSubsets, numHeadings, maxSize, probSample));
-			// 	candidates.get(maxSize-i).calculateSubsets();
-			// }
 
 			candidates = new ArrayList<>();
 
