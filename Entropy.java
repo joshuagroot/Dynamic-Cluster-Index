@@ -13,34 +13,8 @@ public class Entropy{
 
 	public Entropy(int numHeadings){
 		entropy = 0;
-		numThreads = 4;
+		numThreads = 6;
 		this.numHeadings = numHeadings;
-	}
-
-	// Recursive solution
-	public void anyProb(LinkedList<Double> previousValues, ArrayList<HashMap<Double, Integer>> headings){
-		if (previousValues.size() < headings.size() - 1){
-			Iterator i = headings.get(previousValues.size()).values().iterator();
-
-			while (i.hasNext()){
-				previousValues.addFirst(new Double((int)(i.next())));
-
-				anyProb(previousValues, headings);
-				previousValues.removeFirst();
-			}
-		} else{
-			Iterator i = headings.get(previousValues.size()).values().iterator();
-			entropy = 0;
-			int count = 0;
-			while (i.hasNext()){
-				double temp = (int)i.next();
-				temp = temp/numHeadings;
-				for(int j = 0; j < previousValues.size(); j++){
-					temp = temp * (previousValues.get(j)/numHeadings);
-				}
-				entropy += temp * (Math.log(temp)/Math.log(2));
-			}
-		}
 	}
 
 	//Iterative solution

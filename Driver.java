@@ -1,5 +1,9 @@
 import java.io.*;
 import java.util.*;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
+import org.json.simple.parser.JSONParser;
 
 public class Driver {
 
@@ -12,7 +16,7 @@ public class Driver {
 		return false;
 	}
 
-	private static void Process(OpenModel open, ArrayList<FlockBird> birds, int discretize, String testInput,
+	private static void Process(OpenModel open, ArrayList<FlockBird> birds, int discretize, String headingsFile,
 			int maxSize, int numSubsets, int probSample) {
 		List<Integer> state = open.getState();
 		List<String[]> output = open.getTurtles();
@@ -34,10 +38,10 @@ public class Driver {
 			birds.get(i).addFlockMates(output.get(i)[13].split(" "));
 		}
 
-		open.getHeadings(birds, testInput);
+		open.getHeadings(birds, headingsFile);
 		HashMap<Integer, Integer> map = birds.get(0).getMap();
 		int numHeadings = birds.get(0).getNumHeadings();
-		Iterator iter = map.values().iterator();
+		Iterator<Integer> iter = map.values().iterator();
 
 		int count = 0;
 
@@ -55,26 +59,31 @@ public class Driver {
 		}
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception{
 		System.out.println(args[0]);
 
-		String simulationType = args[0];
-		int probSample = Integer.parseInt(args[1]); // Cannot be larger than 10 for my laptop.
-		String testInput = args[2]; // Heading input
-		int maxSize = Integer.parseInt(args[3]); // Maximum size of subset, keep it small (10)
-		int discretize = Integer.parseInt(args[4]); // Resolution of data to look at (larger the better, 10 for my
-													// laptop)
-		int numSubsets = Integer.parseInt(args[5]); // Small for testing (2-3)
+        JSONParser jsonParser = new JSONParser();
+        JSONObject inputList;
 
-		System.out.println("DISCRETIZE:  " + discretize);
+		FileReader jsonInput = new FileReader(args[0]);
+		Object obj = jsonParser.parse(jsonInput);
+		inputList = (JSONObject) obj;
+		System.out.println(inputList);
+
+		String simulationType = (String)inputList.get("BirdObjectData");
+		int probSample = (int)(long)inputList.get("probSample");
+		String headingsFile = (String)inputList.get("movementData");
+		int maxSize = (int)(long)inputList.get("maxSize");
+		int discretize = (int)(long)inputList.get("discretize");
+		int numSubsets = (int)(long)inputList.get("numSubSets"); 
 
 		if (Driver.isFlockingSimulator(simulationType)) {
 
 			ArrayList<FlockBird> birds = new ArrayList<FlockBird>();
 
-			OpenModel open = new OpenModel(args[0], "birds");
+			OpenModel open = new OpenModel(simulationType, "birds");
 
-			Driver.Process(open, birds, discretize, testInput, maxSize, numSubsets, probSample);
+			Driver.Process(open, birds, discretize, headingsFile, maxSize, numSubsets, probSample);
 			
 
 		} else if (args[0].indexOf("TrafficBasic") != -1) {

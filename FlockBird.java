@@ -84,7 +84,7 @@ public class FlockBird{
 	}
 
 	public void calculateEntropy(){
-		Iterator i = headingsProb.values().iterator();
+		Iterator<Integer> i = headingsProb.values().iterator();
 
 		while (i.hasNext()){
 			double temp = (int)i.next();
@@ -108,7 +108,7 @@ public class FlockBird{
 		if(probList.size() != 0){
 			return probList;
 		}
-		Iterator i = headingsProb.values().iterator();
+		Iterator<Integer> i = headingsProb.values().iterator();
 		int count = 0;
 
 		while (i.hasNext() && count < probSample){
@@ -124,10 +124,10 @@ public class FlockBird{
 
 		double returnEnt = 0;
 
-		Iterator i = headingsProb.values().iterator();	
+		Iterator<Integer> i = headingsProb.values().iterator();	
 
 		while (i.hasNext()){
-			Iterator j = otherBird.values().iterator();
+			Iterator<Integer> j = otherBird.values().iterator();
 			double tempFirst = (int)i.next();
 
 			while (j.hasNext()){
