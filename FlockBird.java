@@ -1,21 +1,21 @@
+
 import java.util.*;
 import java.lang.Math;
 
 public class FlockBird{
 
-	public int who;
-	public ArrayList<Integer> headings;
-	public HashMap<Integer, Integer> headingsProb;
-	public ArrayList<Integer> probList; 
-	public double xcor;
-	public double ycor;
-	public ArrayList<Integer> flockMates;
-	public int nearestNeighbour;
-	public double entropy;
-	public int numHeadings;
-	public double returnEnt;
-	public int discretize;
-
+	int who;
+	List<Integer> headings;
+	Map<Integer, Integer> headingsProb;
+	List<Integer> probList; 
+	double xcor;
+	double ycor;
+	List<Integer> flockMates;
+	int nearestNeighbour;
+	double entropy;
+	int numHeadings;
+	double returnEnt;
+	int discretize;
 
 	public FlockBird(int who, double xcor, double ycor, int nearestNeighbour, int discretize){
 		this.who = who;
@@ -71,7 +71,7 @@ public class FlockBird{
 		return false;
 	}
 
-	public ArrayList<Integer> getHeadings(){
+	public List<Integer> getHeadings(){
 		return headings;
 	}
 
@@ -79,7 +79,7 @@ public class FlockBird{
 		return numHeadings;
 	}
 
-	public HashMap<Integer, Integer> getMap(){
+	public Map<Integer, Integer> getMap(){
 		return headingsProb;
 	}
 
@@ -104,7 +104,7 @@ public class FlockBird{
 	}
 
 	// Collect probSample amount of headings in List form
-	public ArrayList<Integer> toList(int probSample){
+	public List<Integer> toList(int probSample){
 		if(probList.size() != 0){
 			return probList;
 		}

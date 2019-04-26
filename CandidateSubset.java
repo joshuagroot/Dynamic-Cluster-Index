@@ -1,23 +1,30 @@
 import java.util.*;
 import java.lang.Math;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
+import org.json.simple.parser.JSONParser;
 
 // Each candidateSubset object holds the DCI for each subset size - e.g. 2, 3, 4...
 public class CandidateSubset{
 
-	public int numHeadings;
-	public Entropy ent;
-	public int subSetsSize;
-	public int subSetLimit;
-	public int maxSize;
-	public int probSample;
-	public double clusterIndex;
-	public Random rand;
-	public ArrayList<FlockBird> birds;
-	public ArrayList<ArrayList<FlockBird>> subsets;
-	public ArrayList<ArrayList<Integer>> listProbs;
-	public ArrayList<Integer> subsetValues;
+	int numHeadings;
+	Entropy ent;
+	int subSetsSize;
+	int subSetLimit;
+	int maxSize;
+	int probSample;
+	double clusterIndex;
+	Random rand;
+	boolean isRandom;
+	List<FlockBird> birds;
+	List<List<FlockBird>> subsets;
+	List<List<Integer>> listProbs;
+	List<Integer> subsetValues;
+	List<Double> dciValues;
+	List<Candidate> candidateSubsets;
 
-	public CandidateSubset(ArrayList<FlockBird> birds, int subSetsSize, int subSetLimit, int numHeadings, int maxSize, int probSample, Random rand){
+	public CandidateSubset(List<FlockBird> birds, int subSetsSize, int subSetLimit, int numHeadings, int maxSize, int probSample, Random rand, boolean isRandom){
 
 		this.numHeadings = numHeadings;
 		this.subSetsSize = subSetsSize;
@@ -27,28 +34,37 @@ public class CandidateSubset{
 		this.probSample = probSample;
 		this.clusterIndex = 0;
 		this.rand = rand;
+		this.isRandom = isRandom;
 
 		ent = new Entropy(numHeadings);
-		subsets = new ArrayList<ArrayList<FlockBird>>();
-		subsetValues = new ArrayList<Integer>();
+		subsets = new ArrayList<>();
+		dciValues = new ArrayList<>();
+		candidateSubsets = new ArrayList<>();
 	}
-
 
 	// Calculate the DCI for subsets of this size - work in progress
 	public void calculateSubsets(){
 		System.out.println("Calculating Subset");
 		// Build subsets
 		for(int i = 0; i < subSetLimit; i++){
-			ArrayList<FlockBird> temp = new ArrayList<FlockBird>();
-			getSubSet(temp, rand.nextInt(birds.size()), subSetsSize);
+
+			List<FlockBird> temp = new ArrayList<>();
+			if(isRandom)
+				getSubSet(temp, rand.nextInt(birds.size()), subSetsSize);
+			else{
+				//System.out.println("We are here " + subSetsSize);
+				getSubSet(temp, i, subSetsSize);
+			}
 			subsets.add(temp);
+
 		}
-		System.out.println("subsets retrieved");
+		//System.out.println(subsetValues);
+		//	System.out.println("subsets retrieved");
 
 		for(int i = 0; i < subsets.size(); i++){
 			// Current subset and rest of the system
-			listProbs = new ArrayList<ArrayList<Integer>>();
-			ArrayList<ArrayList<Integer>> restOfListProbs = new ArrayList<ArrayList<Integer>>();
+			listProbs = new ArrayList<>();
+			List<List<Integer>> restOfListProbs = new ArrayList<>();
 
 			for(int j = 0; j < subsets.get(i).size(); j++){
 				listProbs.add(subsets.get(i).get(j).toList(probSample));
@@ -59,9 +75,9 @@ public class CandidateSubset{
 			ent.anyProbParallel(listProbs);
 
 			double hs = -ent.entropy;
-			System.out.println("HS of CS: " + hs);
+			//System.out.println("HS of CS: " + hs);
 
-			ArrayList<FlockBird> restOfSystem = new ArrayList<FlockBird>();
+			List<FlockBird> restOfSystem = new ArrayList<FlockBird>();
 
 			// Add the rest of the system to the second set, only up to maxSize though
 			for(int j = 0; j < maxSize; j++){
@@ -81,32 +97,45 @@ public class CandidateSubset{
 				restOfListProbs.add(restOfSystem.get(j).toList(probSample));
 			}
 
-
 			//System.out.println("MUTUAL INFO");
 			double mutualInfo= ent.mutualInformation(listProbs, restOfListProbs);
 			//System.out.println("INTEGRATION");
 			double integrate = ent.integration(subsets.get(i), hs);
 
+			subsetValues = new ArrayList<>();
+
+			for(int j = 0; j < subsets.get(i).size(); j++){
+				subsetValues.add(subsets.get(i).get(j).who);
+			}
+
 			clusterIndex = integrate/mutualInfo;
+			candidateSubsets.add(new Candidate(subsetValues, clusterIndex));
+
 			System.out.println(clusterIndex);
 			System.out.println("DONE");
 		}
 	}
 
-	public void getSubSet(ArrayList<FlockBird> subset, int currentPos, int limit){
+	public void getSubSet(List<FlockBird> subset, int currentPos, int limit){
 		subset.add(birds.get(currentPos));
-		subsetValues.add(birds.get(currentPos).who);
+		//subsetValues.add(birds.get(currentPos).who);
+		//System.out.println(currentPos);
 
 		// Getting random subsets could have duplicates - needs work
 		if(limit != 1){
-			getSubSet(subset, rand.nextInt(birds.size()), limit-1);
+			if(isRandom)
+				getSubSet(subset, rand.nextInt(birds.size()), limit-1);
+			else
+				getSubSet(subset, currentPos+1,limit-1);
 		}
 	}
 	public void printSubsets(){
-		for(int i = 0; i < subsets.size(); i++){
-			for(int j = 0; j < subsets.get(i).size(); j++){
-				System.out.print(subsets.get(i).get(j).who + ", ");
+		for(int i = 0; i < candidateSubsets.size(); i++){
+			for(int j = 0; j < candidateSubsets.get(i).getAgents().size(); j++){
+				System.out.print(candidateSubsets.get(i).getAgents().get(j) + ", ");
 			}
+
+			System.out.println("DCI: " + candidateSubsets.get(i).getDci());
 			System.out.println();
 
 		}

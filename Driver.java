@@ -16,8 +16,8 @@ public class Driver {
 		return false;
 	}
 
-	private static void Process(OpenModel open, ArrayList<FlockBird> birds, int discretize, String headingsFile,
-			int maxSize, int numSubsets, int probSample) {
+	private static void Process(OpenModel open, List<FlockBird> birds, int discretize, String headingsFile,
+			int maxSize, int numSubsets, int probSample, boolean random) {
 		List<Integer> state = open.getState();
 		List<String[]> output = open.getTurtles();
 		
@@ -39,7 +39,7 @@ public class Driver {
 		}
 
 		open.getHeadings(birds, headingsFile);
-		HashMap<Integer, Integer> map = birds.get(0).getMap();
+		Map<Integer, Integer> map = birds.get(0).getMap();
 		int numHeadings = birds.get(0).getNumHeadings();
 		Iterator<Integer> iter = map.values().iterator();
 
@@ -54,9 +54,17 @@ public class Driver {
 		// Subsets start at size 2
 		for (int i = 2; i <= maxSize; i++) {
 			System.out.println("i: " + i);
-			candidates.add(new CandidateSubset(birds, i, numSubsets, numHeadings, maxSize, probSample, rand));
+			candidates.add(new CandidateSubset(birds, i, numSubsets, numHeadings, maxSize, probSample, rand, random));
 			candidates.get(i - 2).calculateSubsets();
+			// Break here for now
+			break;
 		}
+
+		candidates.get(0).printSubsets();
+	}
+
+	public static void seive(List<CandidateSubset> candidates){
+
 	}
 
 	public static void main(String[] args) throws Exception{
@@ -75,18 +83,17 @@ public class Driver {
 		String headingsFile = (String)inputList.get("movementData");
 		int maxSize = (int)(long)inputList.get("maxSize");
 		int discretize = (int)(long)inputList.get("discretize");
-		int numSubsets = (int)(long)inputList.get("numSubSets"); 
+		int numSubsets = (int)(long)inputList.get("numSubSets");
+		boolean random = (boolean)inputList.get("random");
 
 		if (Driver.isFlockingSimulator(simulationType)) {
 
-			ArrayList<FlockBird> birds = new ArrayList<FlockBird>();
+			List<FlockBird> birds = new ArrayList<>();
 
 			OpenModel open = new OpenModel(simulationType, "birds");
 
-			Driver.Process(open, birds, discretize, headingsFile, maxSize, numSubsets, probSample);
+			Driver.Process(open, birds, discretize, headingsFile, maxSize, numSubsets, probSample, random);
 			
-
-		} else if (args[0].indexOf("TrafficBasic") != -1) {
 
 		}
 	}

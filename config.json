@@ -5,4 +5,5 @@
 	"maxSize":10,
 	"discretize":10,
 	"numSubSets":10,
+	"random":false,
 }
