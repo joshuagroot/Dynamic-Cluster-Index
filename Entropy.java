@@ -272,13 +272,40 @@ public class Entropy{
 		}
 
 		private void combination(){
-			calcCount++;
 			float temp = 1;
-			for(int i = 0; i < distribution.size(); i++){
-				temp *= (((float)distribution.get(i).get(counters[i]))/(float)numDist);
+			int i = 0;
+			try{
+			calcCount++;
+			
+			// System.out.println("NEW COMB");
+			for(; i < distribution.size(); i++){
+				// System.out.println(i);
+				temp *= (
+					(
+						(float)distribution.get(i).get(
+							counters[i]))/(float)numDist);
 			}
 
 			entropy += temp * (Math.log(temp)/Math.log(2));
+			} catch(java.lang.IndexOutOfBoundsException e) {
+				System.out.println("I: " + i);
+				System.out.println("CALC COUNT:" + calcCount);
+				System.out.println("DIST SIZE: " + distribution.size());
+				System.out.println("DIST: " + distribution.toString());
+				System.out.println("TEMP: " + temp);
+				System.out.println("COUNTER SIZE: " + counters.length);
+				System.out.println("COUNTERS: " + counters.toString());
+				System.out.println("numDist: " + numDist);
+				System.out.println(distribution.get(i).toString());
+				System.out.println();
+				System.out.println(e.toString());
+				System.out.println("COUNTERS");
+				for(int d = 0 ; d < counters.length ; d++) {
+					System.out.println(counters[d]);
+				}
+				System.exit(1);
+
+			}
 		}
 	}
 
