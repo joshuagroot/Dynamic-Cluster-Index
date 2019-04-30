@@ -228,6 +228,9 @@ public class Entropy{
 				int modulo = spreadWork % bases[i];
 				int remainder = spreadWork/bases[i];
 
+				if(modulo < 0) {
+					modulo = 0;
+				}
 				counters[i] = modulo;
 				spreadWork = remainder;
 			}
