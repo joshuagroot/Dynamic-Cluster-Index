@@ -60,7 +60,6 @@ public class Driver {
 
 		// Subsets start at size 2
 		for (int i = 2; i <= maxSize; i++) {
-			System.out.println("i: " + i);
 			candidates.add(new CandidateSubset(birds, i, numSubsets, numHeadings, maxSize, probSample, rand));
 			candidates.get(i - 2).calculateSubsets();
 		}
