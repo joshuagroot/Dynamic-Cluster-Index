@@ -26,10 +26,21 @@ public class Driver {
 			for (int j = 0; j < output.get(i).length; j++) {
 				output.get(i)[j] = output.get(i)[j].replace("\"", "");
 			}
+			String param = output.get(i)[14];
+			Integer subParam = 0;
+
+			if(param.length() > 2) {
+
+				subParam = Integer.parseInt(output.get(i)[14].substring(
+							8, 
+							output.get(i)[14].indexOf('}')
+						));
+			}
 
 			birds.add(new FlockBird(Integer.parseInt(output.get(i)[0]), Double.parseDouble(output.get(i)[3]),
 					Double.parseDouble(output.get(i)[4]),
-					Integer.parseInt(output.get(i)[14].substring(8, output.get(i)[14].indexOf('}'))), discretize));
+					subParam, 
+					discretize));
 
 			birds.get(i).addFlockMates(output.get(i)[13].split(" "));
 		}
