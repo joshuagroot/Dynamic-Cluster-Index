@@ -1,7 +1,7 @@
 import java.util.*;
 import java.lang.Math;
 import java.util.concurrent.*;
-
+import java.util.HashMap;
 
 public class Entropy{
 	public double entropy;
@@ -11,10 +11,13 @@ public class Entropy{
 	public int numThreads;
 	private ExecutorService pool;
 
+	private HashMap<String, Double> cache;
+
 	public Entropy(int numHeadings){
 		entropy = 0;
 		numThreads = 4;
 		this.numHeadings = numHeadings;
+		this.cache = new HashMap<String, Double>();
 	}
 
 	// Recursive solution
@@ -152,6 +155,16 @@ public class Entropy{
 
 	// Parallel iterative solution
 	public void anyProbParallel(ArrayList<ArrayList<Integer>> headings){
+		
+		//Check cache to see if entropy already calculated
+		if(this.cache.get(headings.toString()) != null) {
+			// System.out.println("CACHE HIT\n\n\n");
+			entropy = this.cache.get(headings.toString());	//Set entropy and retur
+			return;
+		} else {
+			// System.out.println("CACHE MISS\n\n\n");
+		}
+
 		entropy = 0;
 		calcCount = 0;
 		int numCalcs = 1;
@@ -197,6 +210,10 @@ public class Entropy{
 			entropy += i;
 		}
 
+		//Set cache TM
+		String key = headings.toString();
+		// System.out.println("Adding item: '" + key + "' with entropy '" + entropy + "'");
+		this.cache.put(key, entropy);
 	}
 
 	// Parallel version of the iterative solution, each thread receives some of the work
