@@ -85,6 +85,7 @@ public class Entropy{
 		//System.out.println(entropy);
 	}
 
+	//Mutual Information; M( S ; U - S )
 	public double mutualInformation(ArrayList<ArrayList<Integer>> firstSet, ArrayList<ArrayList<Integer>> secondSet){
 
 		entropy = 0;
@@ -106,7 +107,7 @@ public class Entropy{
 		//start_time = System.nanoTime();
 		anyProbParallel(firstSet);
 		double first = entropy;
-		System.out.println("PARALLEL RESULT: " + first);
+		System.out.println("	PARALLEL RESULT: " + first);
 		//end_time = System.nanoTime();
 		//double secondDifference = (end_time - start_time) / 1e6;
 
@@ -117,10 +118,10 @@ public class Entropy{
 		//anyProbIter(secondSet);
 		//double rest = entropy;
 		entropy = 0;
-		System.out.println(secondSet);
+		System.out.println("	" + secondSet);
 		anyProbParallel(secondSet);
 		double rest = entropy;
-		System.out.println(rest);
+		System.out.println("	" + rest);
 		//System.out.println("ITERATIVE: " + rest + " PARALLEL " + test);
 
 		//System.exit(0);
@@ -129,19 +130,19 @@ public class Entropy{
 		double jointEntropy = entropy;
 
 		mutualInfo = (first + rest) - jointEntropy;
-		System.out.println("RETURING MUTUAL INFO: " + mutualInfo);
+		System.out.println("	RETURING MUTUAL INFO: " + mutualInfo);
 		return mutualInfo;
 	}
 
 	public double integration(ArrayList<FlockBird> birds, double givenEnt){
-
+	//This appears to suitably implement I( S )	
 		double integrate = 0;
 
 		for(int i = 0; i < birds.size(); i++){
 			integrate += (birds.get(i).getEntropy() - givenEnt);
 		}
 
-		System.out.println("Integration: " + integrate);
+		System.out.println("	Integration: " + integrate);
 
 		return integrate;
 	}
@@ -170,7 +171,7 @@ public class Entropy{
 		int numCalcs = 1;
 		pool = Executors.newFixedThreadPool(numThreads);
 
-		// Find the number of calculations that need to be done
+		// Find the number of calculations that need to be done (number of birds * number of headings for each bird)
 		for(int i = 0; i < headings.size(); i++){
 			numCalcs *= headings.get(i).size();
 		}
@@ -242,7 +243,7 @@ public class Entropy{
 
 			for(int i = distribution.size()-1; i >= 0 && spreadWork != 0; i--){
 				// Fill out work array
-				int modulo = spreadWork % bases[i];
+				int modulo = spreadWork % bases[i];	//TODO: Bad smell, why does this return negs sometimes
 				int remainder = spreadWork/bases[i];
 
 				if(modulo < 0) {
