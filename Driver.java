@@ -21,14 +21,18 @@ public class Driver {
 		
 		Random rand = new Random();
 
+		//Iterate over Turtles/Agents/Birds
 		for (int i = 0; i < output.size(); i++) {
 
+			//Remove escaped quotation marks
 			for (int j = 0; j < output.get(i).length; j++) {
 				output.get(i)[j] = output.get(i)[j].replace("\"", "");
 			}
+
 			String param = output.get(i)[14];
 			Integer subParam = 0;
 
+			//Handling: Non-flocking simulations do not have flockmates
 			if(param.length() > 2) {
 
 				subParam = Integer.parseInt(output.get(i)[14].substring(
