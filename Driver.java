@@ -51,16 +51,11 @@ public class Driver {
 			birds.get(i).addFlockMates(output.get(i)[13].split(" "));
 		}
 
-		open.getHeadings(birds, testInput);
-		HashMap<Integer, Integer> map = birds.get(0).getMap();
-		int numHeadings = birds.get(0).getNumHeadings();
-		Iterator iter = map.values().iterator();
+		open.getHeadings(birds, testInput);		//Get headings from the file, associate with agents
+		
 
-		int count = 0;
-
-		while (iter.hasNext()) {
-			count = count + (int) iter.next();
-		}
+		int numHeadings = birds.get(0).getNumHeadings();	//Get the number of unique headings for the bird
+			
 
 		List<CandidateSubset> candidates = new ArrayList<>();
 
