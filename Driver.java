@@ -41,11 +41,13 @@ public class Driver {
 						));
 			}
 
+			//Create bird from data
 			birds.add(new FlockBird(Integer.parseInt(output.get(i)[0]), Double.parseDouble(output.get(i)[3]),
 					Double.parseDouble(output.get(i)[4]),
 					subParam, 
 					discretize));
 
+			//Add flock mates to bird object (remove for generic purposes)
 			birds.get(i).addFlockMates(output.get(i)[13].split(" "));
 		}
 
@@ -64,6 +66,7 @@ public class Driver {
 
 		// Subsets start at size 2
 		for (int i = 2; i <= maxSize; i++) {
+			//Create new CandidateSubset - no intense logic in constructor
 			candidates.add(new CandidateSubset(birds, i, numSubsets, numHeadings, maxSize, probSample, rand));
 			candidates.get(i - 2).calculateSubsets();
 		}
