@@ -49,35 +49,46 @@ public class CandidateSubset{
 		// Build subsets
 		this.generateSubsets();
 
+		System.out.println("Number of subsets to consider: " + subsets.size() + "\n");
 		for(int i = 0; i < subsets.size(); i++){
+			ArrayList<FlockBird> currentSubset = subsets.get(i);
+
 			// Current subset and rest of the system
 			listProbs = new ArrayList<ArrayList<Integer>>();
 			ArrayList<ArrayList<Integer>> restOfListProbs = new ArrayList<ArrayList<Integer>>();
 
-			for(int j = 0; j < subsets.get(i).size(); j++){
-				listProbs.add(subsets.get(i).get(j).toList(probSample));
+			for(int j = 0; j < currentSubset.size(); j++){
+				listProbs.add(currentSubset.get(j).toList(probSample));
 			}
 
-			// Calculate the current subset
-			// This is needed for integration, but is repeated in mutual information, needs a rework
+			// This is needed for integration, but is repeated in mutual information, needs a rework (TODO duplicated code, cache in Entropy?)
 			ent.anyProbParallel(listProbs);
+			//The previous call waits for the pool of Runnables to stop
 
-			double hs = -ent.entropy;
-			System.out.println("HS of CS: " + hs);
+			double hs = -ent.entropy;	//Flip the sign
+			System.out.println("HS of CS: " + hs);	//TODO: Can this be replicated on a paper system?
 
+			// ArrayList<FlockBird> restOfSystem = new ArrayList<FlockBird>(birds);
+			
 			ArrayList<FlockBird> restOfSystem = new ArrayList<FlockBird>();
+			// restOfSystem.removeAll(currentSubset);
 
 			// Add the rest of the system to the second set, only up to maxSize though
-			for(int j = 0; j < maxSize; j++){
+			//TODO: Use this instead - secondList.removeAll(firstList);
+			// Why is maxSize being used here? ANS: Used for performance
+			
+			for(int birdIterator = 0; birdIterator < maxSize; birdIterator++){
+				FlockBird current = birds.get(birdIterator);
+
 				boolean found = false;
-				for(int k = 0; k < subsets.get(i).size(); k++){
-					if(subsets.get(i).get(k).who == birds.get(j).who){
+				for(int currentSubsetBirdIterator = 0; currentSubsetBirdIterator < currentSubset.size(); currentSubsetBirdIterator++){
+					if(currentSubset.get(currentSubsetBirdIterator).who == current.who){
 						found = true;
 						break;
 					}
 				}
 				if(!found){
-					restOfSystem.add(birds.get(j));
+					restOfSystem.add(current);
 				}
 			}
 
