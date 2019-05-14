@@ -33,17 +33,21 @@ public class CandidateSubset{
 		subsetValues = new ArrayList<Integer>();
 	}
 
+	private void generateSubsets() {
+		//TODO: Clean this up - potentially remove the inner getSubSet recursive logic
+		for(int subSetIndex = 0; subSetIndex < subSetLimit; subSetIndex++){
+			ArrayList<FlockBird> temp = new ArrayList<FlockBird>();
+			getSubSet(temp, rand.nextInt(birds.size()), subSetsSize);
+			subsets.add(temp);
+		}
+		System.out.println("subsets generated");
+	}
 
 	// Calculate the DCI for subsets of this size - work in progress
 	public void calculateSubsets(){
 		System.out.println("Calculating Subset");
 		// Build subsets
-		for(int i = 0; i < subSetLimit; i++){
-			ArrayList<FlockBird> temp = new ArrayList<FlockBird>();
-			getSubSet(temp, rand.nextInt(birds.size()), subSetsSize);
-			subsets.add(temp);
-		}
-		System.out.println("subsets retrieved");
+		this.generateSubsets();
 
 		for(int i = 0; i < subsets.size(); i++){
 			// Current subset and rest of the system
