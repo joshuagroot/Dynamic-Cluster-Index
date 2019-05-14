@@ -20,9 +20,9 @@ public class CandidateSubset{
 	public CandidateSubset(ArrayList<FlockBird> birds, int subSetsSize, int subSetLimit, int numHeadings, int maxSize, int probSample, Random rand){
 
 		this.numHeadings = numHeadings;
-		this.subSetsSize = subSetsSize;
+		this.subSetsSize = subSetsSize;	//Maximum size of a subset
 		this.birds = birds;
-		this.subSetLimit = subSetLimit;
+		this.subSetLimit = subSetLimit;	//Limit on number of subsets to consider
 		this.maxSize = maxSize;
 		this.probSample = probSample;
 		this.clusterIndex = 0;
@@ -96,15 +96,11 @@ public class CandidateSubset{
 				restOfListProbs.add(restOfSystem.get(j).toList(probSample));
 			}
 
-
-			//System.out.println("MUTUAL INFO");
 			double mutualInfo= ent.mutualInformation(listProbs, restOfListProbs);
-			//System.out.println("INTEGRATION");
-			double integrate = ent.integration(subsets.get(i), hs);
+			double integrate = ent.integration(currentSubset, hs);
 
 			clusterIndex = integrate/mutualInfo;
-			System.out.println(clusterIndex);
-			System.out.println("DONE");
+			System.out.println("CLUSTER INDEX:	" + clusterIndex + "\nSubset considered\n");
 		}
 	}
 
