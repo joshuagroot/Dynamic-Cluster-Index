@@ -61,46 +61,18 @@ public class Entropy{
 		entropy = 0;
 		mutualInfo = 0;
 
-		// System.out.print("ITERATIVE: ");
-		// long start_time = System.nanoTime();
-		// anyProbIter(firstSet);
-		// double hs = -entropy;
-		// System.out.println(hs);
-		// //System.out.println("ITERATIVE RESULT: " + hs);
-		// long end_time = System.nanoTime();
-		// double difference = (end_time - start_time) / 1e6;
-		// //System.out.println("Hs of first set: " + hs);
-		// entropy = 0;
-
-
-		//System.out.print("PARALLEL: ");
-		//start_time = System.nanoTime();
 		anyProbParallel(firstSet);
 		double first = entropy;
-		//System.out.println("PARALLEL RESULT: " + first);
-		//end_time = System.nanoTime();
-		//double secondDifference = (end_time - start_time) / 1e6;
 
-		//System.out.println("ITERATIVE: " + hs + " PARALLEL " + test);
-		//entropy = 0;
-
-		//System.out.println("Iterative: " + difference + " parallel: " + secondDifference);
-		//anyProbIter(secondSet);
-		//double rest = entropy;
 		entropy = 0;
-		//System.out.println(secondSet);
 		anyProbParallel(secondSet);
 		double rest = entropy;
-		//System.out.println(rest);
-		//System.out.println("ITERATIVE: " + rest + " PARALLEL " + test);
 
-		//System.exit(0);
 		firstSet.addAll(secondSet);
 		anyProbParallel(firstSet);
 		double jointEntropy = entropy;
 
 		mutualInfo = (first + rest) - jointEntropy;
-		//System.out.println("RETURING MUTUAL INFO: " + mutualInfo);
 		return mutualInfo;
 	}
 
@@ -111,8 +83,6 @@ public class Entropy{
 		for(int i = 0; i < birds.size(); i++){
 			integrate += (birds.get(i).getEntropy() - givenEnt);
 		}
-
-		//System.out.println("Integration: " + integrate);
 
 		return integrate;
 	}

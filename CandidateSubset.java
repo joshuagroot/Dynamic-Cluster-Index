@@ -118,9 +118,7 @@ public class CandidateSubset{
 
 	public void getSubSet(List<FlockBird> subset, int currentPos, int limit){
 		subset.add(birds.get(currentPos));
-		//subsetValues.add(birds.get(currentPos).who);
-		//System.out.println(currentPos);
-
+		
 		// Getting random subsets could have duplicates - needs work
 		if(limit != 1){
 			if(isRandom)
@@ -139,5 +137,9 @@ public class CandidateSubset{
 			System.out.println();
 
 		}
+	}
+
+	public List<Candidate> getCandidates(){
+		return candidateSubsets;
 	}
 }
