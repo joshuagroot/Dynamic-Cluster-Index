@@ -27,25 +27,37 @@ public class CandidateSubset{
 	public CandidateSubset(List<FlockBird> birds, int subSetsSize, int subSetLimit, int numHeadings, int maxSize, int probSample, Random rand, boolean isRandom){
 
 		this.numHeadings = numHeadings;
-		this.subSetsSize = subSetsSize;
+		this.subSetsSize = subSetsSize;	// Maximum size of a subset
 		this.birds = birds;
-		this.subSetLimit = subSetLimit;
-		this.maxSize = maxSize;
-		this.probSample = probSample;
-		this.clusterIndex = 0;
-		this.rand = rand;
-		this.isRandom = isRandom;
+		this.subSetLimit = subSetLimit;	// Limit on number of subsets to consider
+		this.maxSize = maxSize;			// The maximum size of the 'rest of the system' - used to limit calculations for performance gains
+		this.probSample = probSample;	// How many heading probabilities to consider per agent
+		this.clusterIndex = 0;			// Initialise cluster index value
+		this.rand = rand;				// RNG object to use
+		this.isRandom = isRandom;		// Flag to indicate the random selector should be used
 
-		ent = new Entropy(numHeadings);
+		ent = new Entropy(numHeadings);	//Initialise Object used to generate entropy values
 		subsets = new ArrayList<>();
 		dciValues = new ArrayList<>();
 		candidateSubsets = new ArrayList<>();
+	}
+
+	private void generateSubsets() {
+		//TODO: Clean this up - potentially remove the inner getSubSet recursive logic
+		for(int subSetIndex = 0; subSetIndex < subSetLimit; subSetIndex++){
+			ArrayList<FlockBird> temp = new ArrayList<FlockBird>();
+			getSubSet(temp, rand.nextInt(birds.size()), subSetsSize);
+			subsets.add(temp);
+		}
+		System.out.println("subsets generated");
 	}
 
 	// Calculate the DCI for subsets of this size - work in progress
 	public void calculateSubsets(){
 		System.out.println("Calculating Subset");
 		// Build subsets
+		// this.generateSubsets();
+		//TODO: USE this.generateSubsets() instead, port isRandom logic
 		for(int i = 0; i < subSetLimit; i++){
 
 			List<FlockBird> temp = new ArrayList<>();
@@ -58,38 +70,47 @@ public class CandidateSubset{
 			subsets.add(temp);
 
 		}
-		//System.out.println(subsetValues);
-		//	System.out.println("subsets retrieved");
 
+		System.out.println("Number of subsets to consider: " + subsets.size() + "\n");
 		for(int i = 0; i < subsets.size(); i++){
+			List<FlockBird> currentSubset = subsets.get(i);
+
 			// Current subset and rest of the system
 			listProbs = new ArrayList<>();
 			List<List<Integer>> restOfListProbs = new ArrayList<>();
 
-			for(int j = 0; j < subsets.get(i).size(); j++){
-				listProbs.add(subsets.get(i).get(j).toList(probSample));
+			/*
+				- toList is a method on FlockBird
+			*/
+			for(int j = 0; j < currentSubset.size(); j++){
+				listProbs.add(currentSubset.get(j).toList(probSample));
 			}
 
-			// Calculate the current subset
-			// This is needed for integration, but is repeated in mutual information, needs a rework
+			// This is needed for integration, but is repeated in mutual information, needs a rework (TODO duplicated code, cache in Entropy?)
 			ent.anyProbParallel(listProbs);
+			//The previous call waits for the pool of Runnables to stop
 
-			double hs = -ent.entropy;
-			//System.out.println("HS of CS: " + hs);
-
+			double hs = -ent.entropy;	//Flip the sign
+			System.out.println("HS of CS: " + hs);	//TODO: Can this be replicated on a paper system?
+			
 			List<FlockBird> restOfSystem = new ArrayList<FlockBird>();
 
 			// Add the rest of the system to the second set, only up to maxSize though
-			for(int j = 0; j < maxSize; j++){
+			//TODO: Use this instead - secondList.removeAll(firstList);
+			// Why is maxSize being used here? ANS: Used for performance
+			
+			for(int birdIterator = 0; birdIterator < maxSize; birdIterator++){
+				FlockBird current = birds.get(birdIterator);
+
 				boolean found = false;
-				for(int k = 0; k < subsets.get(i).size(); k++){
-					if(subsets.get(i).get(k).who == birds.get(j).who){
+				for(int currentSubsetBirdIterator = 0; currentSubsetBirdIterator < currentSubset.size(); currentSubsetBirdIterator++){
+					if(currentSubset.get(currentSubsetBirdIterator).who == current.who){
 						found = true;
 						break;
 					}
 				}
 				if(!found){
-					restOfSystem.add(birds.get(j));
+					restOfSystem.add(current);
 				}
 			}
 
@@ -97,10 +118,8 @@ public class CandidateSubset{
 				restOfListProbs.add(restOfSystem.get(j).toList(probSample));
 			}
 
-			//System.out.println("MUTUAL INFO");
 			double mutualInfo= ent.mutualInformation(listProbs, restOfListProbs);
-			//System.out.println("INTEGRATION");
-			double integrate = ent.integration(subsets.get(i), hs);
+			double integrate = ent.integration(currentSubset, hs);
 
 			subsetValues = new ArrayList<>();
 
@@ -109,9 +128,9 @@ public class CandidateSubset{
 			}
 
 			clusterIndex = integrate/mutualInfo;
+			System.out.println("CLUSTER INDEX:	" + clusterIndex + "\nSubset considered\n");
 			candidateSubsets.add(new Candidate(subsetValues, clusterIndex));
 
-			System.out.println(clusterIndex);
 			System.out.println("DONE");
 		}
 	}

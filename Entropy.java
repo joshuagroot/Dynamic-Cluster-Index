@@ -1,7 +1,7 @@
 import java.util.*;
 import java.lang.Math;
 import java.util.concurrent.*;
-
+import java.util.HashMap;
 
 public class Entropy{
 	public double entropy;
@@ -11,10 +11,13 @@ public class Entropy{
 	public int numThreads;
 	private ExecutorService pool;
 
+	private HashMap<String, Double> cache;
+
 	public Entropy(int numHeadings){
 		entropy = 0;
-		numThreads = 6;
-		this.numHeadings = numHeadings;
+		numThreads = 6;		//Number of threads to use for calculations
+		this.numHeadings = numHeadings;		//The number of headings
+		this.cache = new HashMap<String, Double>();		//Initialising the simple cache
 	}
 
 	//Iterative solution
@@ -56,6 +59,7 @@ public class Entropy{
 		//System.out.println(entropy);
 	}
 
+	//Mutual Information; M( S ; U - S )
 	public double mutualInformation(List<List<Integer>> firstSet, List<List<Integer>> secondSet){
 
 		entropy = 0;
@@ -63,26 +67,33 @@ public class Entropy{
 
 		anyProbParallel(firstSet);
 		double first = entropy;
+		System.out.println("	PARALLEL RESULT: " + first);	// TODO: Make these messages toggle-able
 
 		entropy = 0;
+		System.out.println("	Second set: " + secondSet);
 		anyProbParallel(secondSet);
 		double rest = entropy;
+		System.out.println("	REST: " + rest);
+		//System.out.println("ITERATIVE: " + rest + " PARALLEL " + test);
 
 		firstSet.addAll(secondSet);
 		anyProbParallel(firstSet);
 		double jointEntropy = entropy;
 
 		mutualInfo = (first + rest) - jointEntropy;
+		System.out.println("	RETURNING MUTUAL INFO: " + mutualInfo);
 		return mutualInfo;
 	}
 
+	//This appears to suitably implement I( S )	
 	public double integration(List<FlockBird> birds, double givenEnt){
-
 		double integrate = 0;
 
 		for(int i = 0; i < birds.size(); i++){
 			integrate += (birds.get(i).getEntropy() - givenEnt);
 		}
+
+		System.out.println("	Integration: " + integrate);
 
 		return integrate;
 	}
@@ -96,12 +107,21 @@ public class Entropy{
 
 	// Parallel iterative solution
 	public void anyProbParallel(List<List<Integer>> headings){
+		//Check cache to see if entropy already calculated
+		if(this.cache.get(headings.toString()) != null) {
+			// System.out.println("CACHE HIT\n\n\n");
+			entropy = this.cache.get(headings.toString());	//Set entropy and return
+			return;
+		} else {
+			// System.out.println("CACHE MISS\n\n\n");
+		}
+
 		entropy = 0;
 		calcCount = 0;
 		int numCalcs = 1;
 		pool = Executors.newFixedThreadPool(numThreads);
 
-		// Find the number of calculations that need to be done
+		// Find the number of calculations that need to be done (number of birds * number of headings for each bird)
 		for(int i = 0; i < headings.size(); i++){
 			numCalcs *= headings.get(i).size();
 		}
@@ -141,6 +161,9 @@ public class Entropy{
 			entropy += i;
 		}
 
+		//Set cache TM
+		String key = headings.toString();
+		this.cache.put(key, entropy);
 	}
 
 	// Parallel version of the iterative solution, each thread receives some of the work
@@ -169,9 +192,12 @@ public class Entropy{
 
 			for(int i = distribution.size()-1; i >= 0 && spreadWork != 0; i--){
 				// Fill out work array
-				int modulo = spreadWork % bases[i];
+				int modulo = spreadWork % bases[i];	//TODO: Bad smell, why does this return negs sometimes
 				int remainder = spreadWork/bases[i];
 
+				if(modulo < 0) {
+					modulo = 0;
+				}
 				counters[i] = modulo;
 				spreadWork = remainder;
 			}
@@ -213,13 +239,40 @@ public class Entropy{
 		}
 
 		private void combination(){
-			calcCount++;
 			float temp = 1;
-			for(int i = 0; i < distribution.size(); i++){
-				temp *= (((float)distribution.get(i).get(counters[i]))/(float)numDist);
+			int i = 0;
+			try{
+			calcCount++;
+			
+			// System.out.println("NEW COMB");
+			for(; i < distribution.size(); i++){
+				// System.out.println(i);
+				temp *= (
+					(
+						(float)distribution.get(i).get(
+							counters[i]))/(float)numDist);
 			}
 
 			entropy += temp * (Math.log(temp)/Math.log(2));
+			} catch(java.lang.IndexOutOfBoundsException e) {
+				System.out.println("I: " + i);
+				System.out.println("CALC COUNT:" + calcCount);
+				System.out.println("DIST SIZE: " + distribution.size());
+				System.out.println("DIST: " + distribution.toString());
+				System.out.println("TEMP: " + temp);
+				System.out.println("COUNTER SIZE: " + counters.length);
+				System.out.println("COUNTERS: " + counters.toString());
+				System.out.println("numDist: " + numDist);
+				System.out.println(distribution.get(i).toString());
+				System.out.println();
+				System.out.println(e.toString());
+				System.out.println("COUNTERS");
+				for(int d = 0 ; d < counters.length ; d++) {
+					System.out.println(counters[d]);
+				}
+				System.exit(1);
+
+			}
 		}
 	}
 

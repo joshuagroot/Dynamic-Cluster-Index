@@ -86,23 +86,41 @@ public class Driver {
 		
 		Random rand = new Random();
 
+		//Iterate over Turtles/Agents/Birds
 		for (int i = 0; i < output.size(); i++) {
 
+			//Remove escaped quotation marks
 			for (int j = 0; j < output.get(i).length; j++) {
 				output.get(i)[j] = output.get(i)[j].replace("\"", "");
 			}
 
+			String param = output.get(i)[14];
+			Integer subParam = 0;
+
+			//Handling: Non-flocking simulations do not have flockmates
+			if(param.length() > 2) {
+
+				subParam = Integer.parseInt(output.get(i)[14].substring(
+							8, 
+							output.get(i)[14].indexOf('}')
+						));
+			}
+
+			//Create bird from data
 			birds.add(new FlockBird(Integer.parseInt(output.get(i)[0]), Double.parseDouble(output.get(i)[3]),
 					Double.parseDouble(output.get(i)[4]),
-					Integer.parseInt(output.get(i)[14].substring(8, output.get(i)[14].indexOf('}'))), discretize));
+					subParam, 
+					discretize));
 
+			//Add flock mates to bird object (remove for generic purposes)
 			birds.get(i).addFlockMates(output.get(i)[13].split(" "));
-			System.out.println(birds.get(i).who);
+			// System.out.println(birds.get(i).who);
 		}
+
 
 		open.getHeadings(birds, headingsFile);
 		Map<Integer, Integer> map = birds.get(0).getMap();
-		int numHeadings = birds.get(0).getNumHeadings();
+		int numHeadings = birds.get(0).getNumHeadings();	//Get the number of unique headings for the bird
 		Iterator<Integer> iter = map.values().iterator();
 
 		List<CandidateSubset> candidateSubsets = new ArrayList<>();
@@ -110,8 +128,18 @@ public class Driver {
 
 		// Subsets start at size 2
 		for (int i = 2; i <= maxSize; i++) {
+
 			System.out.println("i: " + i);
-			candidateSubsets.add(new CandidateSubset(birds, i, numSubsets, numHeadings, maxSize, probSample, rand, random));
+			candidateSubsets.add(new CandidateSubset(
+				birds, 			// The list of FlockBird ojects representing agents in the system
+				i, 				// Passed to 'subsetsSize' - maximum size of a subset
+				numSubsets, 	// Number of subsets to generate
+				numHeadings,	// Number of headings - used to create Entropy object
+				maxSize, 		// The maximum size of the 'rest of the system' internal variable - used to limit calculations for performance gains
+				probSample, 	// How many heading probabilities to consider per agent
+				rand, 
+				random
+			));
 			candidateSubsets.get(i - 2).calculateSubsets();
 
 			candidates.add(candidateSubsets.get(i-2).getCandidates());
@@ -122,8 +150,8 @@ public class Driver {
 		candidateSubsets.get(0).printSubsets();
 		Collections.sort(candidates.get(0), new CandidateComparison());
 
-		System.out.println(candidates.get(0));
-		System.out.println(sieve(candidates.get(0)));
+		// System.out.println(candidates.get(0));
+		// System.out.println(sieve(candidates.get(0)));
 	}
 
 	// Check if one candidate is wholly contained within another
@@ -164,9 +192,10 @@ public class Driver {
 
 	public static void main(String[] args) throws Exception{
 
-		testSieving();
+		// testSieving();
 
 		System.out.println(args[0]);
+
 
         JSONParser jsonParser = new JSONParser();
         JSONObject inputList;
@@ -175,6 +204,13 @@ public class Driver {
 		Object obj = jsonParser.parse(jsonInput);
 		inputList = (JSONObject) obj;
 		System.out.println(inputList);
+
+		// TODO: Move these comments to the below parameters
+		// int probSample = Integer.parseInt(args[1]); // Cannot be larger than 10 for my laptop.
+		// String testInput = args[2]; 				// Heading input
+		// int maxSize = Integer.parseInt(args[3]); 	// Maximum size of subset, keep it small (10)
+		// int discretize = Integer.parseInt(args[4]); // Resolution of data to look at (larger the better, 10 for my laptop)
+		// int numSubsets = Integer.parseInt(args[5]); // Small for testing (2-3)
 
 		String simulationType = (String)inputList.get("BirdObjectData");
 		int probSample = (int)(long)inputList.get("probSample");
