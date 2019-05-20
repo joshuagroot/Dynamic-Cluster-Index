@@ -1,6 +1,11 @@
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
+import org.json.simple.parser.JSONParser;
+ 
 
 public class OpenModel {
 	private String name;
@@ -8,10 +13,10 @@ public class OpenModel {
 	private String line = "";
 	private BufferedReader br = null;
 	private String cvsSplitBy = ",";
-	private ArrayList<String> fileCache = new ArrayList<String>();
+	private List<String> fileCache = new ArrayList<String>();
 
-	private ArrayList<String> getRowsFromFile(String filename) {
-		ArrayList<String> results = new ArrayList<String>();
+	private List<String> getRowsFromFile(String filename) {
+		List<String> results = new ArrayList<>();
 
 		try {
 			br = new BufferedReader(new FileReader(filename));
@@ -35,8 +40,8 @@ public class OpenModel {
 		this.fileCache = getRowsFromFile(this.name);
 	}
 
-	public ArrayList<Integer> getState() {
-		ArrayList<Integer> state = new ArrayList<Integer>();
+	public List<Integer> getState() {
+		List<Integer> state = new ArrayList<>();
 
 		int headerIndex = -1;
 		// Find the area that follows "Random state" header line
@@ -86,8 +91,8 @@ public class OpenModel {
 		return this.fileCache.get(headerIndex + 1).split(cvsSplitBy);
 	}
 
-	public ArrayList<String[]> getTurtles() {
-		ArrayList<String[]> birds = new ArrayList<String[]>();
+	public List<String[]> getTurtles() {
+		List<String[]> birds = new ArrayList<>();
 
 		int headerIndex = 1;
 		for (int index = 0; index < this.fileCache.size(); index++) {
@@ -118,7 +123,7 @@ public class OpenModel {
 		return birds;
 	}
 
-	public void getHeadings(ArrayList<FlockBird> birds, String file) {
+	public void getHeadings(List<FlockBird> birds, String file) {
 		int index;
 		double heading;
 
@@ -128,7 +133,7 @@ public class OpenModel {
 			e.printStackTrace();
 		}
 
-		ArrayList<String> testInputRows = this.getRowsFromFile(file);
+		List<String> testInputRows = this.getRowsFromFile(file);
 
 		for (String line : testInputRows) {
 			line = line.stripLeading();

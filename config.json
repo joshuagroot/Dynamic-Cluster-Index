@@ -1,0 +1,9 @@
+{
+	"BirdObjectData":"models/FlockingBirds/Flocking world.csv",
+	"probSample":5,
+	"movementData":"models/FlockingBirds/FlockOutput.txt",
+	"maxSize":10,
+	"discretize":10,
+	"numSubSets":10,
+	"random":false,
+}

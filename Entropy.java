@@ -15,40 +15,14 @@ public class Entropy{
 
 	public Entropy(int numHeadings){
 		entropy = 0;
-		numThreads = 4;		//Number of threads to use for calculations
+		numThreads = 6;		//Number of threads to use for calculations
 		this.numHeadings = numHeadings;		//The number of headings
 		this.cache = new HashMap<String, Double>();		//Initialising the simple cache
 	}
 
-	// Recursive solution
-	public void anyProb(LinkedList<Double> previousValues, ArrayList<HashMap<Double, Integer>> headings){
-		if (previousValues.size() < headings.size() - 1){
-			Iterator i = headings.get(previousValues.size()).values().iterator();
-
-			while (i.hasNext()){
-				previousValues.addFirst(new Double((int)(i.next())));
-
-				anyProb(previousValues, headings);
-				previousValues.removeFirst();
-			}
-		} else{
-			Iterator i = headings.get(previousValues.size()).values().iterator();
-			entropy = 0;
-			int count = 0;
-			while (i.hasNext()){
-				double temp = (int)i.next();
-				temp = temp/numHeadings;
-				for(int j = 0; j < previousValues.size(); j++){
-					temp = temp * (previousValues.get(j)/numHeadings);
-				}
-				entropy += temp * (Math.log(temp)/Math.log(2));
-			}
-		}
-	}
-
 	//Iterative solution
 	//https://stackoverflow.com/questions/16549831/all-possible-combination-of-n-sets
-	public void anyProbIter(ArrayList<ArrayList<Integer>> headings){
+	public void anyProbIter(List<List<Integer>> headings){
 		entropy = 0;
 		calcCount = 0;
 
@@ -59,7 +33,7 @@ public class Entropy{
 		} while(increment(counters, headings));
 	}
 
-	private boolean increment(int[] counters, ArrayList<ArrayList<Integer>> headings){
+	private boolean increment(int[] counters, List<List<Integer>> headings){
 		for(int i=headings.size()-1; i>=0; i--){
 			if(counters[i] <headings.get(i).size()-1){
 				counters[i]++;
@@ -72,7 +46,7 @@ public class Entropy{
 		return false;
 	}
 
-	private void combination(int[] counters, ArrayList<ArrayList<Integer>> headings){
+	private void combination(int[] counters, List<List<Integer>> headings){
 		double temp = 1.0;
 
 		for(int i = 0; i < headings.size(); i++){
@@ -86,56 +60,33 @@ public class Entropy{
 	}
 
 	//Mutual Information; M( S ; U - S )
-	public double mutualInformation(ArrayList<ArrayList<Integer>> firstSet, ArrayList<ArrayList<Integer>> secondSet){
+	public double mutualInformation(List<List<Integer>> firstSet, List<List<Integer>> secondSet){
 
 		entropy = 0;
 		mutualInfo = 0;
 
-		// System.out.print("ITERATIVE: ");
-		// long start_time = System.nanoTime();
-		// anyProbIter(firstSet);
-		// double hs = -entropy;
-		// System.out.println(hs);
-		// //System.out.println("ITERATIVE RESULT: " + hs);
-		// long end_time = System.nanoTime();
-		// double difference = (end_time - start_time) / 1e6;
-		// //System.out.println("Hs of first set: " + hs);
-		// entropy = 0;
-
-
-		//System.out.print("PARALLEL: ");
-		//start_time = System.nanoTime();
 		anyProbParallel(firstSet);
 		double first = entropy;
-		System.out.println("	PARALLEL RESULT: " + first);
-		//end_time = System.nanoTime();
-		//double secondDifference = (end_time - start_time) / 1e6;
+		System.out.println("	PARALLEL RESULT: " + first);	// TODO: Make these messages toggle-able
 
-		//System.out.println("ITERATIVE: " + hs + " PARALLEL " + test);
-		//entropy = 0;
-
-		//System.out.println("Iterative: " + difference + " parallel: " + secondDifference);
-		//anyProbIter(secondSet);
-		//double rest = entropy;
 		entropy = 0;
-		System.out.println("	" + secondSet);
+		System.out.println("	Second set: " + secondSet);
 		anyProbParallel(secondSet);
 		double rest = entropy;
-		System.out.println("	" + rest);
+		System.out.println("	REST: " + rest);
 		//System.out.println("ITERATIVE: " + rest + " PARALLEL " + test);
 
-		//System.exit(0);
 		firstSet.addAll(secondSet);
 		anyProbParallel(firstSet);
 		double jointEntropy = entropy;
 
 		mutualInfo = (first + rest) - jointEntropy;
-		System.out.println("	RETURING MUTUAL INFO: " + mutualInfo);
+		System.out.println("	RETURNING MUTUAL INFO: " + mutualInfo);
 		return mutualInfo;
 	}
 
-	public double integration(ArrayList<FlockBird> birds, double givenEnt){
 	//This appears to suitably implement I( S )	
+	public double integration(List<FlockBird> birds, double givenEnt){
 		double integrate = 0;
 
 		for(int i = 0; i < birds.size(); i++){
@@ -155,12 +106,11 @@ public class Entropy{
 	}
 
 	// Parallel iterative solution
-	public void anyProbParallel(ArrayList<ArrayList<Integer>> headings){
-		
+	public void anyProbParallel(List<List<Integer>> headings){
 		//Check cache to see if entropy already calculated
 		if(this.cache.get(headings.toString()) != null) {
 			// System.out.println("CACHE HIT\n\n\n");
-			entropy = this.cache.get(headings.toString());	//Set entropy and retur
+			entropy = this.cache.get(headings.toString());	//Set entropy and return
 			return;
 		} else {
 			// System.out.println("CACHE MISS\n\n\n");
@@ -213,7 +163,6 @@ public class Entropy{
 
 		//Set cache TM
 		String key = headings.toString();
-		// System.out.println("Adding item: '" + key + "' with entropy '" + entropy + "'");
 		this.cache.put(key, entropy);
 	}
 
@@ -223,13 +172,13 @@ public class Entropy{
 		private int[] counters;
 		private double[] result;
 		private int pos;
-		private ArrayList<ArrayList<Integer>> distribution;
+		private List<List<Integer>> distribution;
 		private int numDist;
 		private int numWork;
 		private double entropy;
 		private int calcCount = 0;
 
-		public ParallelEntropy(int[] bases, double[] result, int pos, ArrayList<ArrayList<Integer>> distribution, int numDist, int numWork){
+		public ParallelEntropy(int[] bases, double[] result, int pos, List<List<Integer>> distribution, int numDist, int numWork){
 			//this.counters = counters;
 			counters = new int[distribution.size()];
 			this.distribution = distribution;
