@@ -20,15 +20,15 @@ public class CandidateSubset{
 	public CandidateSubset(ArrayList<FlockBird> birds, int subSetsSize, int subSetLimit, int numHeadings, int maxSize, int probSample, Random rand){
 
 		this.numHeadings = numHeadings;
-		this.subSetsSize = subSetsSize;	//Maximum size of a subset
+		this.subSetsSize = subSetsSize;	// Maximum size of a subset
 		this.birds = birds;
-		this.subSetLimit = subSetLimit;	//Limit on number of subsets to consider
-		this.maxSize = maxSize;
-		this.probSample = probSample;
-		this.clusterIndex = 0;
-		this.rand = rand;
+		this.subSetLimit = subSetLimit;	// Limit on number of subsets to consider
+		this.maxSize = maxSize;			// The maximum size of the 'rest of the system' - used to limit calculations for performance gains
+		this.probSample = probSample;	// How many heading probabilities to consider per agent
+		this.clusterIndex = 0;			// Initialise cluster index value
+		this.rand = rand;				// RNG object to use
 
-		ent = new Entropy(numHeadings);
+		ent = new Entropy(numHeadings);	//Initialise Object used to generate entropy values
 		subsets = new ArrayList<ArrayList<FlockBird>>();
 		subsetValues = new ArrayList<Integer>();
 	}
@@ -57,6 +57,9 @@ public class CandidateSubset{
 			listProbs = new ArrayList<ArrayList<Integer>>();
 			ArrayList<ArrayList<Integer>> restOfListProbs = new ArrayList<ArrayList<Integer>>();
 
+			/*
+				- toList is a method on FlockBird
+			*/
 			for(int j = 0; j < currentSubset.size(); j++){
 				listProbs.add(currentSubset.get(j).toList(probSample));
 			}

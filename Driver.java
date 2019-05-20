@@ -62,7 +62,15 @@ public class Driver {
 		// Subsets start at size 2
 		for (int i = 2; i <= maxSize; i++) {
 			//Create new CandidateSubset - no intense logic in constructor
-			candidates.add(new CandidateSubset(birds, i, numSubsets, numHeadings, maxSize, probSample, rand));
+			candidates.add(new CandidateSubset(
+				birds, 			// The list of FlockBird ojects representing agents in the system
+				i, 				// Passed to 'subsetsSize' - maximum size of a subset
+				numSubsets, 	// Number of subsets to generate
+				numHeadings,	// Number of headings - used to create Entropy object
+				maxSize, 		// The maximum size of the 'rest of the system' internal variable - used to limit calculations for performance gains
+				probSample, 	// How many heading probabilities to consider per agent
+				rand 			//	
+			));
 			candidates.get(i - 2).calculateSubsets();
 		}
 	}
@@ -72,10 +80,9 @@ public class Driver {
 
 		String simulationType = args[0];
 		int probSample = Integer.parseInt(args[1]); // Cannot be larger than 10 for my laptop.
-		String testInput = args[2]; // Heading input
-		int maxSize = Integer.parseInt(args[3]); // Maximum size of subset, keep it small (10)
-		int discretize = Integer.parseInt(args[4]); // Resolution of data to look at (larger the better, 10 for my
-													// laptop)
+		String testInput = args[2]; 				// Heading input
+		int maxSize = Integer.parseInt(args[3]); 	// Maximum size of subset, keep it small (10)
+		int discretize = Integer.parseInt(args[4]); // Resolution of data to look at (larger the better, 10 for my laptop)
 		int numSubsets = Integer.parseInt(args[5]); // Small for testing (2-3)
 
 		System.out.println("DISCRETIZE:  " + discretize);

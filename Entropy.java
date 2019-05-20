@@ -15,9 +15,9 @@ public class Entropy{
 
 	public Entropy(int numHeadings){
 		entropy = 0;
-		numThreads = 4;
-		this.numHeadings = numHeadings;
-		this.cache = new HashMap<String, Double>();
+		numThreads = 4;		//Number of threads to use for calculations
+		this.numHeadings = numHeadings;		//The number of headings
+		this.cache = new HashMap<String, Double>();		//Initialising the simple cache
 	}
 
 	// Recursive solution
