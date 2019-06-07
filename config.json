@@ -1,9 +1,12 @@
 {
-	"BirdObjectData":"models/FlockingBirds/Flocking world.csv",
-	"probSample":5,
-	"movementData":"models/FlockingBirds/FlockOutput.txt",
-	"maxSize":10,
-	"discretize":10,
+	"BirdObjectData":"models/FlockingBirds/25Birds.csv",
+	"probSample":10,
+	"movementData":"models/FlockingBirds/birdHeadings.txt",
+	"output":"savedDCI/Phoenix/timeTest.json",
+	"maxSize":25,
+	"totalSets": 100,
+	"discretize":35,
 	"numSubSets":10,
-	"random":false,
+	"numThreads":6,
+	"random":true,
 }

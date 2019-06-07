@@ -2,7 +2,7 @@ import java.util.*;
 import java.lang.Math;
 import java.math.BigInteger;
 import java.util.concurrent.*;
-
+import java.util.HashMap;
 
 public class Entropy{
 	public double entropy;
@@ -64,6 +64,7 @@ public class Entropy{
 		//System.out.println(entropy);
 	}
 
+	//Mutual Information; M( S ; U - S )
 	public double mutualInformation(List<List<Integer>> firstSet, List<List<Integer>> secondSet){
 
 		entropy = 0;
@@ -71,26 +72,33 @@ public class Entropy{
 
 		anyProbParallel(firstSet);
 		double first = entropy;
+		System.out.println("	PARALLEL RESULT: " + first);	// TODO: Make these messages toggle-able
 
 		entropy = 0;
+		System.out.println("	Second set: " + secondSet);
 		anyProbParallel(secondSet);
 		double rest = entropy;
+		System.out.println("	REST: " + rest);
+		//System.out.println("ITERATIVE: " + rest + " PARALLEL " + test);
 
 		firstSet.addAll(secondSet);
 		anyProbParallel(firstSet);
 		double jointEntropy = entropy;
 
 		mutualInfo = (first + rest) - jointEntropy;
+		System.out.println("	RETURNING MUTUAL INFO: " + mutualInfo);
 		return mutualInfo;
 	}
 
+	//This appears to suitably implement I( S )	
 	public double integration(List<FlockBird> birds, double givenEnt){
-
 		double integrate = 0;
 
 		for(int i = 0; i < birds.size(); i++){
 			integrate += (birds.get(i).getEntropy() - givenEnt);
 		}
+
+		System.out.println("	Integration: " + integrate);
 
 		return integrate;
 	}
@@ -104,15 +112,21 @@ public class Entropy{
 
 	// Parallel iterative solution
 	public void anyProbParallel(List<List<Integer>> distribution){
-		
-		//System.out.println("SET SIZE: " + distribution.size());
+		//Check cache to see if entropy already calculated
+		if(this.cache.get(distribution.toString()) != null) {
+			// System.out.println("CACHE HIT\n\n\n");
+			entropy = this.cache.get(distribution.toString());	//Set entropy and return
+			return;
+		} else {
+			// System.out.println("CACHE MISS\n\n\n");
+		}
+
 		entropy = 0;
 		calcCount = 0;
 		BigInteger numWork = new BigInteger("1");
 		long numCalcs = 1;
 		pool = Executors.newFixedThreadPool(numThreads);
 		counters = new int[distribution.size()];
-
 		// PREVIOUS SOLUTION
 		//Find the number of calculations that need to be done
 		for(int i = 0; i < distribution.size(); i++){
@@ -197,6 +211,7 @@ public class Entropy{
 			Collections.sort(i);
 		}
 		String key = distribution.toString();
+
 		this.cache.put(key, entropy);
 	}
 
@@ -373,6 +388,7 @@ public class Entropy{
 			}
 
 			entropy += (temp * (Math.log(temp)/Math.log(2)));
+
 		}
 	}
 
