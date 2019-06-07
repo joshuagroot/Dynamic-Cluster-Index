@@ -24,7 +24,8 @@ public class CandidateSubset{
 	List<Double> dciValues;
 	List<Candidate> candidateSubsets;
 
-	public CandidateSubset(List<FlockBird> birds, int subSetsSize, int subSetLimit, int numHeadings, int maxSize, int probSample, Random rand, boolean isRandom){
+	public CandidateSubset(List<FlockBird> birds, int subSetsSize, int subSetLimit, int numHeadings, 
+		int maxSize, int probSample, int numThreads, Random rand, boolean isRandom){
 
 		this.numHeadings = numHeadings;
 		this.subSetsSize = subSetsSize;
@@ -36,7 +37,7 @@ public class CandidateSubset{
 		this.rand = rand;
 		this.isRandom = isRandom;
 
-		ent = new Entropy(numHeadings);
+		ent = new Entropy(numHeadings, numThreads);
 		subsets = new ArrayList<>();
 		dciValues = new ArrayList<>();
 		candidateSubsets = new ArrayList<>();
@@ -50,13 +51,12 @@ public class CandidateSubset{
 
 			List<FlockBird> temp = new ArrayList<>();
 			if(isRandom)
-				getSubSet(temp, rand.nextInt(birds.size()), subSetsSize);
+				getSubSet(temp, rand.nextInt(birds.size()), subSetsSize, new ArrayList<FlockBird>());
 			else{
 				//System.out.println("We are here " + subSetsSize);
-				getSubSet(temp, i, subSetsSize);
+				getSubSet(temp, i, subSetsSize, new ArrayList<FlockBird>());
 			}
 			subsets.add(temp);
-
 		}
 		//System.out.println(subsetValues);
 		//	System.out.println("subsets retrieved");
@@ -116,17 +116,22 @@ public class CandidateSubset{
 		}
 	}
 
-	public void getSubSet(List<FlockBird> subset, int currentPos, int limit){
-		subset.add(birds.get(currentPos));
+	public void getSubSet(List<FlockBird> subset, int currentPos, int limit, List<FlockBird> used){
+		if(!subset.contains(birds.get(currentPos)))
+			subset.add(birds.get(currentPos));
+			//used.add(birds.get(currentPos));
+		else
+			System.out.println("USED FOUND");
 		
 		// Getting random subsets could have duplicates - needs work
-		if(limit != 1){
+		if(limit > 1){
 			if(isRandom)
-				getSubSet(subset, rand.nextInt(birds.size()), limit-1);
+				getSubSet(subset, rand.nextInt(birds.size()), limit-1, used);
 			else
-				getSubSet(subset, currentPos+1,limit-1);
+				getSubSet(subset, currentPos+1,limit-1, used);
 		}
 	}
+
 	public void printSubsets(){
 		for(int i = 0; i < candidateSubsets.size(); i++){
 			for(int j = 0; j < candidateSubsets.get(i).getAgents().size(); j++){
@@ -135,7 +140,6 @@ public class CandidateSubset{
 
 			System.out.println("DCI: " + candidateSubsets.get(i).getDci());
 			System.out.println();
-
 		}
 	}
 

@@ -136,7 +136,10 @@ public class OpenModel {
 		List<String> testInputRows = this.getRowsFromFile(file);
 
 		for (String line : testInputRows) {
-			line = line.stripLeading();
+			while(line.charAt(0) == ' '){
+				line = line.substring(1);
+			}
+			//line = line.stripLeading();
 
 			String[] terms = line.split(" ");
 
