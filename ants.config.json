@@ -1,0 +1,10 @@
+{
+	"simulationType": "ants",
+	"BirdObjectData":"models/ANTS/antsSetup.txt",
+	"probSample":15,
+	"movementData":"models/ANTS/noZeros.txt",
+	"maxSize":20,
+	"discretize":0,
+	"numSubSets":10,
+	"random":false
+}
