@@ -33,6 +33,9 @@ public class OpenModel {
 		}
 		return results;
 	}
+	public String getName() {
+		return this.name;
+	}
 
 	public OpenModel(String name, String type) {
 		this.name = name;
@@ -53,9 +56,9 @@ public class OpenModel {
 			}
 		}
 
-		if (headerIndex == -1) {
-			System.out.println("ERROR DIDN'T WORK");
-			return null;
+		if (headerIndex == -1) {		//Site 1
+			System.out.println("NO RANDOM STATE SECTION DETECTED IN SETUP FILE");	
+			return new ArrayList<Integer>();
 		}
 
 		String[] stringInts = this.fileCache.get(headerIndex + 1).split(" ");
@@ -77,14 +80,14 @@ public class OpenModel {
 		// Find the area that follows "Random state" header line
 		for (int index = 0; index < this.fileCache.size(); index++) {
 			String line = this.fileCache.get(index);
-			if (line.contains("\"GLOBALS\"")) {
+			if (line.contains("GLOBALS")) {
 				headerIndex = index;
 				break;
 			}
 		}
 
-		if (headerIndex == -1) {
-			System.out.println("ERROR DIDN'T WORK");
+		if (headerIndex == -1) {	//Site 2
+			System.out.println("ERROR DIDN'T WORK - invalid headerIndex value (-1) - site 2");
 			return null;
 		}
 
@@ -103,8 +106,8 @@ public class OpenModel {
 			}
 		}
 
-		if (headerIndex == -1) {
-			System.out.println("ERROR DIDN'T WORK");
+		if (headerIndex == -1) {	//Site 3
+			System.out.println("ERROR DIDN'T WORK - invalid headerIndex value (-1) - site 3");
 			return null;
 		}
 
@@ -160,7 +163,7 @@ public class OpenModel {
 
 			index = Integer.parseInt(terms[0]);
 			heading = Double.parseDouble(terms[1]);
-			birds.get(index).addHeading(heading);
+			this.addHeadingToAgent(birds, index, heading);
 		}
 	}
 }
