@@ -94,27 +94,35 @@ public class Driver {
 				output.get(i)[j] = output.get(i)[j].replace("\"", "");
 			}
 
-			String param = output.get(i)[14];
+
 			Integer subParam = 0;
+			if(Driver.isFlockingSimulator(open.getName())) {
+				String param = output.get(i)[14];
+							//Handling: Non-flocking simulations do not have flockmates
+				if(param.length() > 2) {
 
-			//Handling: Non-flocking simulations do not have flockmates
-			if(param.length() > 2) {
-
-				subParam = Integer.parseInt(output.get(i)[14].substring(
-							8, 
-							output.get(i)[14].indexOf('}')
-						));
+					subParam = Integer.parseInt(output.get(i)[14].substring(
+								8, 
+								output.get(i)[14].indexOf('}')
+							));
+				}
 			}
 
-			//Create bird from data
-			birds.add(new FlockBird(Integer.parseInt(output.get(i)[0]), Double.parseDouble(output.get(i)[3]),
+			if(Driver.isFlockingSimulator(open.getName())) {
+				//Create bird from data
+				birds.add(new FlockBird(Integer.parseInt(output.get(i)[0]), Double.parseDouble(output.get(i)[3]),
 					Double.parseDouble(output.get(i)[4]),
 					subParam, 
 					discretize));
 
-			//Add flock mates to bird object (remove for generic purposes)
-			birds.get(i).addFlockMates(output.get(i)[13].split(" "));
-			// System.out.println(birds.get(i).who);
+				//Add flock mates to bird object (remove for generic purposes)
+				FlockBird current = (FlockBird) birds.get(i);
+				current.addFlockMates(output.get(i)[13].split(" "));
+				// System.out.println(birds.get(i).who);
+			} else {
+				birds.add(new Agent(Integer.parseInt(output.get(i)[0]),discretize));
+			}
+
 		}
 
 
@@ -144,7 +152,7 @@ public class Driver {
 
 			candidates.add(candidateSubsets.get(i-2).getCandidates());
 			// Break here for now
-			break;
+			// break;
 		}
 
 		candidateSubsets.get(0).printSubsets();
@@ -212,7 +220,8 @@ public class Driver {
 		// int discretize = Integer.parseInt(args[4]); // Resolution of data to look at (larger the better, 10 for my laptop)
 		// int numSubsets = Integer.parseInt(args[5]); // Small for testing (2-3)
 
-		String simulationType = (String)inputList.get("BirdObjectData");
+		String simulationType = (String)inputList.get("simulationType");
+		String simulationSetupFile = (String) inputList.get("BirdObjectData");
 		int probSample = (int)(long)inputList.get("probSample");
 		String headingsFile = (String)inputList.get("movementData");
 		int maxSize = (int)(long)inputList.get("maxSize");
@@ -220,15 +229,15 @@ public class Driver {
 		int numSubsets = (int)(long)inputList.get("numSubSets");
 		boolean random = (boolean)inputList.get("random");
 
-		if (Driver.isFlockingSimulator(simulationType)) {
+		// if (Driver.isFlockingSimulator(simulationType)) {
 
 			List<Agent> birds = new ArrayList<>();
 
-			OpenModel open = new OpenModel(simulationType, "birds");
+			OpenModel open = new OpenModel(simulationSetupFile, "birds");
 
 			Driver.Process(open, birds, discretize, headingsFile, maxSize, numSubsets, probSample, random);
 			
 
-		}
+		// }
 	}
 }
