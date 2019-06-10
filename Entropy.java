@@ -67,13 +67,11 @@ public class Entropy{
 
 		anyProbParallel(firstSet);
 		double first = entropy;
-		System.out.println("	PARALLEL RESULT: " + first);	// TODO: Make these messages toggle-able
+		// System.out.println("	PARALLEL RESULT: " + first);	// TODO: Make these messages toggle-able
 
 		entropy = 0;
-		System.out.println("	Second set: " + secondSet);
 		anyProbParallel(secondSet);
 		double rest = entropy;
-		System.out.println("	REST: " + rest);
 		//System.out.println("ITERATIVE: " + rest + " PARALLEL " + test);
 
 		firstSet.addAll(secondSet);
@@ -86,7 +84,7 @@ public class Entropy{
 	}
 
 	//This appears to suitably implement I( S )	
-	public double integration(List<FlockBird> birds, double givenEnt){
+	public double integration(List<Agent> birds, double givenEnt){
 		double integrate = 0;
 
 		for(int i = 0; i < birds.size(); i++){

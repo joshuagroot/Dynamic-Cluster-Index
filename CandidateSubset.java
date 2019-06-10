@@ -17,15 +17,14 @@ public class CandidateSubset{
 	double clusterIndex;
 	Random rand;
 	boolean isRandom;
-	List<FlockBird> birds;
-	List<List<FlockBird>> subsets;
+	List<Agent> birds;
+	List<List<Agent>> subsets;
 	List<List<Integer>> listProbs;
 	List<Integer> subsetValues;
 	List<Double> dciValues;
 	List<Candidate> candidateSubsets;
 
-	public CandidateSubset(List<FlockBird> birds, int subSetsSize, int subSetLimit, int numHeadings, int maxSize, int probSample, Random rand, boolean isRandom){
-
+	public CandidateSubset(List<Agent> birds, int subSetsSize, int subSetLimit, int numHeadings, int maxSize, int probSample, Random rand, boolean isRandom){
 		this.numHeadings = numHeadings;
 		this.subSetsSize = subSetsSize;	// Maximum size of a subset
 		this.birds = birds;
@@ -45,7 +44,7 @@ public class CandidateSubset{
 	private void generateSubsets() {
 		//TODO: Clean this up - potentially remove the inner getSubSet recursive logic
 		for(int subSetIndex = 0; subSetIndex < subSetLimit; subSetIndex++){
-			ArrayList<FlockBird> temp = new ArrayList<FlockBird>();
+			ArrayList<Agent> temp = new ArrayList<Agent>();
 			getSubSet(temp, rand.nextInt(birds.size()), subSetsSize);
 			subsets.add(temp);
 		}
@@ -60,20 +59,24 @@ public class CandidateSubset{
 		//TODO: USE this.generateSubsets() instead, port isRandom logic
 		for(int i = 0; i < subSetLimit; i++){
 
-			List<FlockBird> temp = new ArrayList<>();
+			List<Agent> temp = new ArrayList<>();
 			if(isRandom)
 				getSubSet(temp, rand.nextInt(birds.size()), subSetsSize);
 			else{
 				//System.out.println("We are here " + subSetsSize);
 				getSubSet(temp, i, subSetsSize);
 			}
+			// System.out.println(temp);
+			// for(Agent item : temp) {
+			// 	System.out.println(item.who);
+			// }
 			subsets.add(temp);
 
 		}
 
 		System.out.println("Number of subsets to consider: " + subsets.size() + "\n");
 		for(int i = 0; i < subsets.size(); i++){
-			List<FlockBird> currentSubset = subsets.get(i);
+			List<Agent> currentSubset = subsets.get(i);
 
 			// Current subset and rest of the system
 			listProbs = new ArrayList<>();
@@ -83,7 +86,7 @@ public class CandidateSubset{
 				- toList is a method on FlockBird
 			*/
 			for(int j = 0; j < currentSubset.size(); j++){
-				listProbs.add(currentSubset.get(j).toList(probSample));
+				listProbs.add(currentSubset.get(j).toList(probSample));	//Adding list of Freqs
 			}
 
 			// This is needed for integration, but is repeated in mutual information, needs a rework (TODO duplicated code, cache in Entropy?)
@@ -93,14 +96,14 @@ public class CandidateSubset{
 			double hs = -ent.entropy;	//Flip the sign
 			System.out.println("HS of CS: " + hs);	//TODO: Can this be replicated on a paper system?
 			
-			List<FlockBird> restOfSystem = new ArrayList<FlockBird>();
+			List<Agent> restOfSystem = new ArrayList<Agent>();
 
 			// Add the rest of the system to the second set, only up to maxSize though
 			//TODO: Use this instead - secondList.removeAll(firstList);
 			// Why is maxSize being used here? ANS: Used for performance
 			
 			for(int birdIterator = 0; birdIterator < maxSize; birdIterator++){
-				FlockBird current = birds.get(birdIterator);
+				Agent current = birds.get(birdIterator);
 
 				boolean found = false;
 				for(int currentSubsetBirdIterator = 0; currentSubsetBirdIterator < currentSubset.size(); currentSubsetBirdIterator++){
@@ -115,7 +118,9 @@ public class CandidateSubset{
 			}
 
 			for(int j = 0; j < restOfSystem.size(); j++){
-				restOfListProbs.add(restOfSystem.get(j).toList(probSample));
+				restOfListProbs.add(
+					restOfSystem.get(j)
+					.toList(probSample));		//Gets frequencies out of map (Heading=>Freq)				
 			}
 
 			double mutualInfo= ent.mutualInformation(listProbs, restOfListProbs);
@@ -135,7 +140,7 @@ public class CandidateSubset{
 		}
 	}
 
-	public void getSubSet(List<FlockBird> subset, int currentPos, int limit){
+	public void getSubSet(List<Agent> subset, int currentPos, int limit){
 		subset.add(birds.get(currentPos));
 		
 		// Getting random subsets could have duplicates - needs work

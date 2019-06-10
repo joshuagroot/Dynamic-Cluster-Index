@@ -75,7 +75,7 @@ public class Driver {
 		return returnList;
 	}
 
-	private static void Process(OpenModel open, List<FlockBird> birds, int discretize, String headingsFile,
+	private static void Process(OpenModel open, List<Agent> birds, int discretize, String headingsFile,
 			int maxSize, int numSubsets, int probSample, boolean random) {
 		List<Integer> state = open.getState();
 		List<String[]> output = open.getTurtles();
@@ -222,7 +222,7 @@ public class Driver {
 
 		if (Driver.isFlockingSimulator(simulationType)) {
 
-			List<FlockBird> birds = new ArrayList<>();
+			List<Agent> birds = new ArrayList<>();
 
 			OpenModel open = new OpenModel(simulationType, "birds");
 
