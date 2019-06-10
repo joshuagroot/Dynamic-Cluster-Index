@@ -123,7 +123,19 @@ public class OpenModel {
 		return birds;
 	}
 
-	public void getHeadings(List<FlockBird> birds, String file) {
+	public void addHeadingToAgent(List<Agent> birds, int agentId, double reading) {
+		int index = 0;
+		//TODO: Calculate correct index number
+		for(int i = 0 ; i < birds.size() ; i++) {
+			Agent currentAgent = birds.get(i);
+			if(currentAgent.who == agentId) {
+				birds.get(i).addHeading(reading);
+				return;
+			}
+		}
+	}
+
+	public void getHeadings(List<Agent> birds, String file) {
 		int index;
 		double heading;
 
