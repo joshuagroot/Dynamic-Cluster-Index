@@ -136,9 +136,15 @@ public class OpenModel {
 		List<String> testInputRows = this.getRowsFromFile(file);
 
 		for (String line : testInputRows) {
+			if( line.startsWith("#")) {
+				continue;
+			}
 			line = line.stripLeading();
 
 			String[] terms = line.split(" ");
+			if(terms.length < 2) {
+				continue;
+			}
 
 			index = Integer.parseInt(terms[0]);
 			heading = Double.parseDouble(terms[1]);
