@@ -84,7 +84,7 @@ public class Driver {
 		
 		Driver.globals = open.getGlobals();
 		
-		Random rand = new Random();
+		Random rand = new Random(System.currentTimeMillis());
 
 		//Iterate over Turtles/Agents/Birds
 		for (int i = 0; i < output.size(); i++) {
