@@ -24,10 +24,11 @@ public class CandidateSubset{
 	List<Double> dciValues;
 	List<Candidate> candidateSubsets;
 
-	public CandidateSubset(List<Agent> birds, int subSetsSize, int subSetLimit, int numHeadings, int maxSize, int probSample, Random rand, boolean isRandom){
+	public CandidateSubset(List<Agent> birds, int subSetsSize, int subSetLimit, int numHeadings, int maxSize, int probSample, int numThreads, Random rand, boolean isRandom){
 		this.numHeadings = numHeadings;
 		this.subSetsSize = subSetsSize;	// Maximum size of a subset
 		this.birds = birds;
+
 		this.subSetLimit = subSetLimit;	// Limit on number of subsets to consider
 		this.maxSize = maxSize;			// The maximum size of the 'rest of the system' - used to limit calculations for performance gains
 		this.probSample = probSample;	// How many heading probabilities to consider per agent
@@ -35,7 +36,8 @@ public class CandidateSubset{
 		this.rand = rand;				// RNG object to use
 		this.isRandom = isRandom;		// Flag to indicate the random selector should be used
 
-		ent = new Entropy(numHeadings);	//Initialise Object used to generate entropy values
+		ent = new Entropy(numHeadings, numThreads);	//Initialise Object used to generate entropy values
+
 		subsets = new ArrayList<>();
 		dciValues = new ArrayList<>();
 		candidateSubsets = new ArrayList<>();
@@ -71,7 +73,6 @@ public class CandidateSubset{
 			// 	System.out.println(item.who);
 			// }
 			subsets.add(temp);
-
 		}
 
 		System.out.println("Number of subsets to consider: " + subsets.size() + "\n");
@@ -83,7 +84,7 @@ public class CandidateSubset{
 			List<List<Integer>> restOfListProbs = new ArrayList<>();
 
 			/*
-				- toList is a method on FlockBird
+				- toList is a method on  FlockBird
 			*/
 			for(int j = 0; j < currentSubset.size(); j++){
 				listProbs.add(currentSubset.get(j).toList(probSample));	//Adding list of Freqs
@@ -141,16 +142,19 @@ public class CandidateSubset{
 	}
 
 	public void getSubSet(List<Agent> subset, int currentPos, int limit){
-		subset.add(birds.get(currentPos));
+		if(!subset.contains(birds.get(currentPos))){
+			subset.add(birds.get(currentPos));
+		}
 		
 		// Getting random subsets could have duplicates - needs work
-		if(limit != 1){
+		if(limit > 1){
 			if(isRandom)
 				getSubSet(subset, rand.nextInt(birds.size()), limit-1);
 			else
 				getSubSet(subset, currentPos+1,limit-1);
 		}
 	}
+
 	public void printSubsets(){
 		for(int i = 0; i < candidateSubsets.size(); i++){
 			for(int j = 0; j < candidateSubsets.get(i).getAgents().size(); j++){
@@ -159,7 +163,6 @@ public class CandidateSubset{
 
 			System.out.println("DCI: " + candidateSubsets.get(i).getDci());
 			System.out.println();
-
 		}
 	}
 

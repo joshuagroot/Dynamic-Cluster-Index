@@ -154,7 +154,10 @@ public class OpenModel {
 			if( line.startsWith("#")) {
 				continue;
 			}
-			line = line.stripLeading();
+		
+			while(line.charAt(0) == ' '){		//removed stripLeading() as it is not supported by Phoenix's JDK version
+				line = line.substring(1);
+			}
 
 			String[] terms = line.split(" ");
 			if(terms.length < 2) {

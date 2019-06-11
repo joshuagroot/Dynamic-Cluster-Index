@@ -45,6 +45,39 @@ public class Driver {
 		return candidateSet;
 	}
 
+	public static List<Candidate> testRead(String fileName) throws Exception{
+		List<Candidate> candidateSet = new ArrayList<>();
+		JSONParser jsonParser = new JSONParser();
+		FileReader jsonInput = new FileReader(fileName);
+
+		Object obj = jsonParser.parse(jsonInput);
+		//JSONObject inputList = (JSONObject) obj;
+		JSONArray jsonArray = (JSONArray) obj;
+
+		//System.out.println("PRINTING READ ARRAY");
+		//System.out.println(jsonArray);
+
+		for(int i = 0; i < jsonArray.size(); i++){
+			List<Integer> currentCandidateAgents = new ArrayList<>();
+			Candidate currentCandidate;
+
+			JSONObject item = (JSONObject) jsonArray.get(i);
+			String agentsAsString = (String) item.get("agents");
+			//System.out.println("AGENTS");
+
+			String[] stringItems = agentsAsString.split(" ");
+
+			for(String agentToInt : stringItems){
+				//System.out.println(agentToInt);
+				currentCandidateAgents.add(Integer.parseInt(agentToInt.replaceAll("[^\\d]", "" )));
+			}
+			double currentDCI = Double.parseDouble((String)item.get("DCI"));
+			currentCandidate = new Candidate(currentCandidateAgents, currentDCI);
+			candidateSet.add(currentCandidate);
+		}
+
+		return candidateSet;
+	}
 	// Sieving algorithm to remove overlapping subsets. 
 	// Checks all pairs of subsets and if overlap is found, removes the subset with the lower DCI value
 	public static List<Candidate> sieve(List<Candidate> candidates){
@@ -54,7 +87,14 @@ public class Driver {
 		boolean[] deleted = new boolean[numCandidates];
 
 		for(int i = 0; i < numCandidates-1; i++){
+			if(candidates.get(i).getDci() == Double.POSITIVE_INFINITY){
+						deleted[i] = true;
+						continue;
+			}
 			for(int j = i+1; j < numCandidates; j++){
+				if(candidates.get(j).getDci() == Double.POSITIVE_INFINITY){
+					deleted[j] = true;
+				}
 				if(deleted[i] != true && deleted[j] != true){
 					if(isSubset(candidates.get(i), candidates.get(j))){
 						if(candidates.get(i).getDci() > candidates.get(j).getDci())
@@ -76,7 +116,7 @@ public class Driver {
 	}
 
 	private static void Process(OpenModel open, List<Agent> birds, int discretize, String headingsFile,
-			int maxSize, int numSubsets, int probSample, boolean random) {
+			int maxSize, int totalSize, int numSubsets, int probSample, int numThreads, boolean random, String outputFile) {
 		List<Integer> state = open.getState();
 		List<String[]> output = open.getTurtles();
 
@@ -93,6 +133,10 @@ public class Driver {
 			for (int j = 0; j < output.get(i).length; j++) {
 				output.get(i)[j] = output.get(i)[j].replace("\"", "");
 			}
+			System.out.println(output.get(i)[14]);
+			String neighbour = output.get(i)[14];
+			if(neighbour.length() > 8)
+				neighbour = neighbour.substring(8, output.get(i)[14].indexOf('}'));
 
 
 			Integer subParam = 0;
@@ -112,17 +156,15 @@ public class Driver {
 				//Create bird from data
 				birds.add(new FlockBird(Integer.parseInt(output.get(i)[0]), Double.parseDouble(output.get(i)[3]),
 					Double.parseDouble(output.get(i)[4]),
-					subParam, 
-					discretize));
+					Integer.parseInt(neighbour), discretize));
 
-				//Add flock mates to bird object (remove for generic purposes)
-				FlockBird current = (FlockBird) birds.get(i);
-				current.addFlockMates(output.get(i)[13].split(" "));
-				// System.out.println(birds.get(i).who);
-			} else {
+				String flockmates = output.get(i)[13];
+			// if(flockmates != "turtles") {
+				// birds.get(i).addFlockMates(output.get(i)[13].split(" "));
+			// } else {
 				birds.add(new Agent(Integer.parseInt(output.get(i)[0]),discretize));
+			// }
 			}
-
 		}
 
 
@@ -135,31 +177,96 @@ public class Driver {
 		List<List<Candidate>> candidates = new ArrayList<>();
 
 		// Subsets start at size 2
-		for (int i = 2; i <= maxSize; i++) {
+		JSONArray jsonCandidates = new JSONArray();
+		int count = 0;
+		for (int i = 2; i <= totalSize; i++) {
+			double start_time = System.nanoTime();
 
 			System.out.println("i: " + i);
-			candidateSubsets.add(new CandidateSubset(
-				birds, 			// The list of FlockBird ojects representing agents in the system
-				i, 				// Passed to 'subsetsSize' - maximum size of a subset
-				numSubsets, 	// Number of subsets to generate
-				numHeadings,	// Number of headings - used to create Entropy object
-				maxSize, 		// The maximum size of the 'rest of the system' internal variable - used to limit calculations for performance gains
-				probSample, 	// How many heading probabilities to consider per agent
-				rand, 
-				random
-			));
-			candidateSubsets.get(i - 2).calculateSubsets();
+			candidateSubsets.add(new CandidateSubset(birds, i, numSubsets, numHeadings, maxSize, probSample, numThreads, rand, random));
+			candidateSubsets.get(count).calculateSubsets();
 
-			candidates.add(candidateSubsets.get(i-2).getCandidates());
+			candidates.add(candidateSubsets.get(count).getCandidates());
+
+			for(int j = 0; j < candidates.get(count).size(); j++){
+				double sub_start_time = System.nanoTime();
+
+				JSONObject currentCandidate = new JSONObject();
+				currentCandidate.put("DCI", Double.toString(candidates.get(count).get(j).getDci()));
+				currentCandidate.put("agents", candidates.get(count).get(j).getAgents().toString());
+
+				//System.out.println("PRINTING CANDIDATE");
+				//System.out.println(currentCandidate);
+				double sub_end_time = System.nanoTime();
+
+				currentCandidate.put("time", sub_end_time - sub_start_time);
+				jsonCandidates.add(currentCandidate);
+
+			}
+			// entire size of model
+			// size dci cluster
+			// runtime it took
+			// Good definition of good enough
+			// model size on left
+			// dci value on right
+			// size
+
+			//currentCandidate.put("DCI", candidates.get())
 			// Break here for now
-			// break;
+
+			//break;
+			//System.out.println("PRINTING CANDIATE ARRAY");
+			//System.out.println(jsonCandidates);
+			try (FileWriter file = new FileWriter(outputFile)) {
+
+				file.write(jsonCandidates.toJSONString());
+				file.flush();
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			double end_time = System.nanoTime();
+
+			count++;
 		}
+
+		
 
 		candidateSubsets.get(0).printSubsets();
 		Collections.sort(candidates.get(0), new CandidateComparison());
+		//System.out.println(candidates.get(0));
+		//System.out.println(sieve(candidates.get(0)));
+	}
 
-		// System.out.println(candidates.get(0));
-		// System.out.println(sieve(candidates.get(0)));
+
+	public static void writeJson(List<Candidate> candidates){
+		JSONArray jsonCandidates = new JSONArray();
+
+		for(int i = 0; i < candidates.size(); i++){
+			//for(int j = 0; j < candidates.get(i).size(); j++){
+				JSONObject currentCandidate = new JSONObject();
+				currentCandidate.put("DCI", Double.toString(candidates.get(i).getDci()));
+				currentCandidate.put("agents", candidates.get(i).getAgents().toString());
+
+				System.out.println("PRINTING CANDIDATE");
+				System.out.println(currentCandidate);
+				jsonCandidates.add(currentCandidate);
+		//	}
+		}
+		
+		//currentCandidate.put("DCI", candidates.get())
+		// Break here for now
+		//break;
+		System.out.println("PRINTING CANDIATE ARRAY");
+		System.out.println(jsonCandidates);
+		try (FileWriter file = new FileWriter("savedDCI/phoenixTest.json")) {
+
+			file.write(jsonCandidates.toJSONString());
+			file.flush();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	// Check if one candidate is wholly contained within another
@@ -189,10 +296,8 @@ public class Driver {
 		System.out.println("SORTED");
 
 		candidates.forEach((i) -> System.out.println(i));
-
 		System.out.println("SIEVING");
 		candidates = sieve(candidates);
-
 		candidates.forEach((i) -> System.out.println(i));
 
 		System.out.println("SIEVED");
@@ -201,8 +306,15 @@ public class Driver {
 	public static void main(String[] args) throws Exception{
 
 		// testSieving();
+		// List<Candidate> candidates = testRead("savedDCI/25Birds.json");
 
-		System.out.println(args[0]);
+
+		// System.out.println("FINAL SET\n" + candidates + "\n");
+		// candidates = sieve(candidates);
+		// System.out.println("FINAL SET AFTER SIEVE: " + candidates);
+		// writeJson(candidates);
+		// System.exit(0);
+		//System.out.println(args[0]);
 
 
         JSONParser jsonParser = new JSONParser();
@@ -224,9 +336,12 @@ public class Driver {
 		String simulationSetupFile = (String) inputList.get("BirdObjectData");
 		int probSample = (int)(long)inputList.get("probSample");
 		String headingsFile = (String)inputList.get("movementData");
-		int maxSize = (int)(long)inputList.get("maxSize");
-		int discretize = (int)(long)inputList.get("discretize");
-		int numSubsets = (int)(long)inputList.get("numSubSets");
+		String output = (String)inputList.get("output");
+		int maxSize = ((Long)inputList.get("maxSize")).intValue();
+		int discretize = ((Long)inputList.get("discretize")).intValue();
+		int numSubsets = ((Long)inputList.get("numSubSets")).intValue();
+		int totalSize = ((Long)inputList.get("totalSets")).intValue();
+		int numThreads = ((Long)inputList.get("totalSets")).intValue();
 		boolean random = (boolean)inputList.get("random");
 
 		// if (Driver.isFlockingSimulator(simulationType)) {
@@ -235,7 +350,7 @@ public class Driver {
 
 			OpenModel open = new OpenModel(simulationSetupFile, "birds");
 
-			Driver.Process(open, birds, discretize, headingsFile, maxSize, numSubsets, probSample, random);
+			Driver.Process(open, birds, discretize, headingsFile, maxSize, totalSize, numSubsets, probSample, numThreads, random, output);
 			
 
 		// }

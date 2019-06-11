@@ -68,7 +68,7 @@ public class Agent{
 
 		while (i.hasNext() && count < probSample){
 			count++;
-			int temp = (int)i.next();
+			int temp = i.next();
 			probList.add(temp);
 		}
 		return probList;
@@ -78,7 +78,7 @@ public class Agent{
 		Iterator<Integer> i = headingsProb.values().iterator();
 
 		while (i.hasNext()){
-			double temp = (int)i.next();
+			double temp = (long)i.next();
 
 			entropy += ((temp/numHeadings) * (Math.log(temp/numHeadings)/Math.log(2)));
 		}
