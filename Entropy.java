@@ -71,6 +71,7 @@ public class Entropy{
 		mutualInfo = 0;
 
 		anyProbParallel(firstSet);
+		System.out.println("FIRST SET: " + firstSet);
 		double first = entropy;
 		System.out.println("	PARALLEL RESULT: " + first);	// TODO: Make these messages toggle-able
 
@@ -80,10 +81,11 @@ public class Entropy{
 		double rest = entropy;
 		System.out.println("	REST: " + rest);
 		//System.out.println("ITERATIVE: " + rest + " PARALLEL " + test);
-
+		entropy = 0;
 		firstSet.addAll(secondSet);
 		anyProbParallel(firstSet);
 		double jointEntropy = entropy;
+		System.out.println("JOINT: " + jointEntropy);
 
 		mutualInfo = (first + rest) - jointEntropy;
 		System.out.println("	RETURNING MUTUAL INFO: " + mutualInfo);
@@ -91,11 +93,11 @@ public class Entropy{
 	}
 
 	//This appears to suitably implement I( S )	
-	public double integration(List<FlockBird> birds, double givenEnt){
+	public double integration(List<Agent> agents, double givenEnt){
 		double integrate = 0;
 
-		for(int i = 0; i < birds.size(); i++){
-			integrate += (birds.get(i).getEntropy() - givenEnt);
+		for(int i = 0; i < agents.size(); i++){
+			integrate += (agents.get(i).getEntropy() - givenEnt);
 		}
 
 		System.out.println("	Integration: " + integrate);
@@ -114,7 +116,7 @@ public class Entropy{
 	public void anyProbParallel(List<List<Integer>> distribution){
 		//Check cache to see if entropy already calculated
 		if(this.cache.get(distribution.toString()) != null) {
-			// System.out.println("CACHE HIT\n\n\n");
+			System.out.println("CACHE HIT\n\n\n");
 			entropy = this.cache.get(distribution.toString());	//Set entropy and return
 			return;
 		} else {
@@ -154,7 +156,7 @@ public class Entropy{
 
 		//PREVIOUS SOLUTION
 		//Find out how much work each thread needs to do
-		int spreadWork = (int)Math.ceil((double)numCalcs/(double)numThreads);
+		long spreadWork = (long)Math.ceil((double)numCalcs/(double)numThreads);
 		System.out.println(spreadWork);
 		if(spreadWork < 0){
 			System.out.println("NUMCALCS: " + numCalcs);

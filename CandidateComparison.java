@@ -6,8 +6,8 @@ public class CandidateComparison implements Comparator<Candidate>{
 		if(first.getDci() == second.getDci()){
 			return 0;
 		} if(first.getDci() < second.getDci()){
-			return 1;
+			return -1;
 		}
-		return -1;
+		return 1;
 	}
 }

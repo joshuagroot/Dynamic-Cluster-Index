@@ -5,7 +5,8 @@ import java.lang.Math;
 public class FlockBird extends Agent{
 	double xcor;
 	double ycor;
-	List<Integer> flockMates;
+	List<List<Integer>> flockMates;
+	Map<Integer, Integer> flockMateFrequency;
 	int nearestNeighbour;
 	
 	public FlockBird(int who, double xcor, double ycor, int nearestNeighbour, int discretize){
@@ -15,16 +16,18 @@ public class FlockBird extends Agent{
 		this.nearestNeighbour = nearestNeighbour;
 		
 
-		flockMates = new ArrayList<Integer>();
+		flockMates = new ArrayList<>();
+		flockMateFrequency = new HashMap<>();
 	}
 
-	public void addFlockMates(String[] stringFlock){
-		for (int i = 1; i < stringFlock.length; i++){
-			if (i == stringFlock.length-1){
-				stringFlock[i] = stringFlock[i].replace("}", "");
-			}
+	public void addFlockMates(List<Integer> newMates){
+		flockMates.add(newMates);
+		for(int i : newMates){
 
-			flockMates.add(Integer.parseInt(stringFlock[i]));
+			if(flockMateFrequency.get(i) == null){
+				flockMateFrequency.put(i, 0);
+			}
+			flockMateFrequency.put(i, flockMateFrequency.get(i)+1);
 		}
 	}
 }

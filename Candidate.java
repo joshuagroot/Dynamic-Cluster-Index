@@ -11,10 +11,16 @@ import org.json.simple.parser.JSONParser;
 public class Candidate{
 	private List<Integer> agents;
 	private double dci;
+	private double time;
+	private double integration;
+	private double mutualInfo;
 
-	Candidate(List<Integer> agents, double dci){
+	Candidate(List<Integer> agents, double dci, double time, double integration, double mutualInfo){
 		this.agents = agents;
 		this.dci = dci;
+		this.time = time;
+		this.integration = integration;
+		this.mutualInfo = mutualInfo;
 	}
 	
 	public List<Integer> getAgents(){
@@ -24,6 +30,19 @@ public class Candidate{
 	public double getDci(){
 		return dci;
 	}
+
+	public double getTime(){
+		return time/1000;
+	}
+
+	public double getIntegration(){
+		return integration;
+	}
+
+	public double getMutualInfo(){
+		return mutualInfo;
+	}
+
 
 	@SuppressWarnings("unchecked")
 	public void save(){
@@ -37,6 +56,8 @@ public class Candidate{
 		}
 		candidateList.put("agents",candidateString.toString());
 		candidateList.put("DCI",dci);
+		candidateList.put("Integration",integration);
+		candidateList.put("MutualInformation",mutualInfo);
 	
 		try (FileWriter file = new FileWriter("savedDCI/" + candidateString.toString() + ".json")) {
  
@@ -53,6 +74,6 @@ public class Candidate{
 
 	}
 	public String toString(){
-		return agents.toString() + " : " + dci;
+		return agents.toString() + " : " + dci + ":" + time;
 	}
 }

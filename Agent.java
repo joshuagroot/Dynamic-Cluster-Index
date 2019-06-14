@@ -106,4 +106,8 @@ public class Agent{
 		return headingsProb;
 	}
 
+	public String toString(){
+		return who + "";
+	}
+
 }

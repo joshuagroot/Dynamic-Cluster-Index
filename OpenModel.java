@@ -148,4 +148,42 @@ public class OpenModel {
 			birds.get(index).addHeading(heading);
 		}
 	}
+
+	public void getFlockMatesAndHeadings(List<FlockBird> birds, String file){
+		int index;
+		double heading;
+
+		try {
+			br = new BufferedReader(new FileReader(file));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+
+		List<String> testInputRows = this.getRowsFromFile(file);
+		List<Integer> currentMates = new ArrayList<>();
+		int currentBird = 0;
+
+		for (String line : testInputRows) {
+			while(line.charAt(0) == ' '){
+				line = line.substring(1);
+			}
+
+			if(line.contains("heading:")){
+				String[] terms = line.split(" heading: ");
+				index = Integer.parseInt(terms[0]);
+				heading = Double.parseDouble(terms[1]);
+				birds.get(index).addHeading(heading);
+			} else if(line.contains(" is mates with:")){
+				currentBird = Integer.parseInt(line.substring(0, line.indexOf(" ")));
+			} else if(line.contains(" is done")){
+				birds.get(currentBird).addFlockMates(currentMates);
+				currentMates = new ArrayList<>();
+			} else{
+				currentMates.add(Integer.parseInt(line));
+			}
+
+			String[] terms = line.split(" ");
+		}
+	}
 }
